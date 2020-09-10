@@ -8,6 +8,10 @@ RUN apt-get update && apt-get install -y unzip
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer require influxdb/influxdb-php
 
+# Set correct Timezone
+RUN ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
+RUN echo "date.timezone = Europe/Berlin" > $PHP_INI_DIR/conf.d/php-datetime.ini
+
 # download ChartJS
 RUN curl -o /var/www/html/charts.js -L https://github.com/chartjs/Chart.js/releases/download/v2.9.3/Chart.bundle.js
 
