@@ -334,21 +334,16 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
             // variable initialization
             $day_solar = array();
             // define start and end time of the loop year
-            $day = mktime(0, 0, 0, 1, 1, $year);
-            $end = mktime(0, 0, 0, 1, 1, $year+1);
-            // loop througl all days of the loop year
-            while ($day < $end) {
-                // define start and end time of the day to query
-                $start_time = mktime(0, 0, 0, date("m", $day), date("d", $day), date("Y", $day));
-                $end_time = mktime(0, 0, 0, date("m", $day), date("d", $day)+1, date("Y", $day));
-                // InfluxDB query
-                $result = $database->query('SELECT spread(solar_total) AS solar, spread(bezug_total) AS grid, spread(consumption_total) AS consumption, spread(einspeisung_total) AS supply FROM totals WHERE time >='.$start_time.'s and time<='.$end_time.'s');
-                $points = $result->getPoints();
-                // extract queried values and round them to full kWh and calculate usage quotas
-                $solar = round($points[0]['solar']/1000, 0);
-                $grid = round($points[0]['grid']/1000, 0);
-                $consumption = round($points[0]['consumption']/1000, 0);
-                $supply = round($points[0]['supply']/1000, 0);
+            $start_time = mktime(0, 0, 0, 1, 1, $year);
+            $end_time = mktime(0, 0, 0, 1, 1, $year+1);
+            // InfluxDB query for whole year incl. Timezone setting!
+            $result = $database->query('SELECT spread(solar_total) AS solar, spread(bezug_total) AS grid, spread(consumption_total) AS consumption, spread(einspeisung_total) AS supply FROM totals WHERE time>='.$start_time.'s and time<'.$end_time.'s GROUP BY time(1d) tz(\'Europe/Berlin\')');
+            $points = $result->getPoints();
+            foreach ($points as $day) {
+                $solar = round($day['solar']/1000, 0);
+                $grid = round($day['grid']/1000, 0);
+                $consumption = round($day['consumption']/1000, 0);
+                $supply = round($day['supply']/1000, 0);
                 $own_consumption = $solar-$supply;
                 if ($solar > 0) {
                     $self_consumption = round(($own_consumption/$solar)*100, 0);
@@ -370,7 +365,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                         $chart_row = "";
                     }
                     $day_table = $day_table."    <tr>
-      <td>".date("d.m.Y", $day)."</td>
+      <td>".date("d.m.Y", strtotime($day['time']))."</td>
       <td>".$solar." kWh</td>
       <td>".$grid." kWh</td>
       <td>".$consumption." kWh</td>
@@ -382,7 +377,6 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                 } else {
                     $day_solar[] = "NaN";
                 }
-                $day = strtotime("+1 day", $day);
             }
             if ($day_chart != "") {
                 $day_chart = $day_chart.",";
