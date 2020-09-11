@@ -20,8 +20,8 @@ $client = new InfluxDB\Client($influx_sma_ip, $influx_sma_port, $influx_sma_user
 $database = $client->selectDB($influx_sma_db);
 
 // language definition and value check
-$dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 12 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit');
-$dict['en'] = array(1 => 'Year', 2 => 'Solar', 3 => 'Grid', 4 => 'Consumption', 5 => 'Supply', 6 => 'Own Consumption', 7 => 'Self Consumption', 8 => 'Self Sufficiency', 9 => 'Chart', 10 => "Month", 11 => 'Solar Energy Generation per Year', 12 => 'Solar Energy per Months', 13 => 'Solar Energy per Day of the Year', 14 => 'Year Table Generation Time', 15 => 'Month Table Generation Time', 16 => 'Day Table Generation Time', 17 => 'Total Generation Time');
+$dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 12 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit', 18 => 'Tag');
+$dict['en'] = array(1 => 'Year', 2 => 'Solar', 3 => 'Grid', 4 => 'Consumption', 5 => 'Supply', 6 => 'Own Consumption', 7 => 'Self Consumption', 8 => 'Self Sufficiency', 9 => 'Chart', 10 => "Month", 11 => 'Solar Energy Generation per Year', 12 => 'Solar Energy per Months', 13 => 'Solar Energy per Day of the Year', 14 => 'Year Table Generation Time', 15 => 'Month Table Generation Time', 16 => 'Day Table Generation Time', 17 => 'Total Generation Time', 18 => 'Day');
 switch(getenv('lang')) {
     case "en":
         $script_lang = "en";
@@ -75,6 +75,13 @@ if ($script_table_borders) {
 $script_chart = getenv('chart');
 if (isset($_GET['chart'])) {
     $script_chart = $_GET['chart'];
+}
+
+// only chart output value check
+if (isset($_GET['onlychart'])) {
+    $script_onlychart = TRUE;
+} else {
+    $script_onlychart = FALSE;
 }
 
 // actual dates
@@ -161,7 +168,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             $year = $year + 1;
         }
     // after looping through all years, print the table and chart
-    print("  <table>
+    $year_html_table = "  <table>
     <tr>
       <th style=\"width: 70px\">".t(1)."</th>
       <th style=\"width: 90px\">".t(2)."</th>
@@ -172,8 +179,8 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
       <th style=\"width: 90px\">".t(7)."</th>
       <th style=\"width: 90px\">".t(8)."</th>
       <th style=\"width: 710px\">".t(9)."</th>
-    </tr>\n".$year_table."  </table>
-  <script>
+    </tr>\n".$year_table."  </table>\n";
+    $year_html_script = "  <script>
     new Chart(document.getElementById('chart_years'), {
       type: 'bar',
       data: {
@@ -196,8 +203,15 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
         }
       }
     });
-  </script>
-  <br>\n");    
+  </script>\n";
+    // output selection of table or only chart
+    if ($script_onlychart) {
+        print("  <div id=\"div_years\" style=\"width: 650px; height: 320px\">
+    <canvas id=\"chart_years\"></canvas>
+  </div>\n".$year_html_script);
+    } else {
+        print($year_html_table.$year_html_script."  <br>\n");
+    }
     // end debug timing for year chart
     $year_time_end = hrtime(true);
     }
@@ -282,7 +296,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
             $year = $year + 1;
         }
     // after looping through all years, print the table and chart
-    print("  <table>
+    $month_html_table = "  <table>
     <tr>
       <th style=\"width: 70px\">".t(10)."</th>
       <th style=\"width: 90px\">".t(2)."</th>
@@ -293,8 +307,8 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
       <th style=\"width: 90px\">".t(7)."</th>
       <th style=\"width: 90px\">".t(8)."</th>
       <th style=\"width: 710px\">".t(9)."</th>
-    </tr>\n".$month_table."  </table>
-  <script>
+    </tr>\n".$month_table."  </table>\n";
+    $month_html_script = "  <script>
     new Chart(document.getElementById('chart_months'), {
       type: 'line',
       data: {
@@ -312,8 +326,15 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
         spanGaps: false
       }
     });
-  </script>
-  <br>\n");
+  </script>\n";
+    // output selection of table or only chart
+    if ($script_onlychart) {
+        print("  <div id=\"div_months\" style=\"width: 650px; height: 320px\">
+    <canvas id=\"chart_months\"></canvas>
+    </div>\n".$month_html_script);
+    } else {
+        print($month_html_table.$month_html_script."  <br>\n");
+    }
     // end debug timing for month chart
     $month_time_end = hrtime(true);
     }
@@ -392,9 +413,9 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
             $year = $year + 1;
         }
     // after looping through all years, print the table and chart
-    print("  <table>
+    $day_html_table = "  <table>
     <tr>
-      <th style=\"width: 70px\">".t(10)."</th>
+      <th style=\"width: 70px\">".t(18)."</th>
       <th style=\"width: 90px\">".t(2)."</th>
       <th style=\"width: 90px\">".t(3)."</th>
       <th style=\"width: 90px\">".t(4)."</th>
@@ -403,14 +424,14 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
       <th style=\"width: 90px\">".t(7)."</th>
       <th style=\"width: 90px\">".t(8)."</th>
       <th style=\"width: 710px\">".t(9)."</th>
-    </tr>\n".$day_table."  </table>
-  <script>
+    </tr>\n".$day_table."  </table>";
+    $day_html_script = "  <script>
     new Chart(document.getElementById('chart_days'), {
       type: 'line',
       data: {
-        labels: ['1'");
-    for ($i = 2 ; $i < 367; $i++){ print(",'".$i."'"); }
-    print("],
+        labels: ['1'";
+    for ($i = 2 ; $i < 367; $i++){ $day_html_script = $day_html_script.",'".$i."'"; }
+    $day_html_script = $day_html_script."],
         datasets: [".$day_chart."
         ]
       },
@@ -431,8 +452,15 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
         spanGaps: false
       }
     });
-  </script>
-  <br>\n");
+  </script>\n";
+    // output selection of table or only chart
+    if ($script_onlychart) {
+        print("  <div id=\"div_days\" style=\"width: 650px; height: 320px\">
+    <canvas id=\"chart_days\"></canvas>
+    </div>\n".$day_html_script);
+    } else {
+        print($day_html_table.$day_html_script."  <br>\n");
+    }
     // end debug timing for day chart
     $day_time_end = hrtime(true);
     }
