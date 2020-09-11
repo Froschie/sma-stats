@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  sma-stats:
+    image: sma-stats:latest
+    container_name: sma-stats
+    ports:
+      - 8080:80
+    environment:
+      - smadb_ip=192.168.1.2
+      - smadb_port=8086
+      - smadb_db=SMA
+      - smadb_user=user
+      - smadb_pw=pw
+      - lang=en
+      - table_borders=yes
+      - chart=all
+    restart: unless-stopped
