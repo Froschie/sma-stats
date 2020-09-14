@@ -143,17 +143,8 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             // save values into array for chart
             $year_array[] = $year;
             $year_solar[] = $solar;
-            // generate table rows and insert in first line the chart
-            if ($year_table == "") {
-                $chart_row = "\n      <td rowspan=\"1000\" style=\"vertical-align: top\">
-        <div id=\"div_years\" style=\"width: 650px; height: 320px\">
-          <canvas id=\"chart_years\"></canvas>
-        </div>
-      </td>";
-            } else {
-                $chart_row = "";
-            }
-            $year_table = $year_table."    <tr>
+            // generate table rows
+            $year_table = "    <tr>
       <td>".$year."</td>
       <td>".$solar." kWh</td>
       <td>".$grid." kWh</td>
@@ -161,13 +152,13 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
       <td>".$supply." kWh</td>
       <td>".$own_consumption." kWh</td>
       <td>".$self_consumption." %</td>
-      <td>".$self_sufficiency." %</td>".$chart_row."
-    </tr>\n";
+      <td>".$self_sufficiency." %</td>
+    </tr>\n".$year_table;
             // debug line
             //print("-solar:-".$solar."kWh--grid:-".$grid."kWh--consumption:-".$consumption."kWh--supply:-".$supply."kWh--own-consumption:-".$own_consumption."kWh--self-consumption:-".$self_consumption."%--self-sufficiency:-".$self_sufficiency."%--\n");
             $year = $year + 1;
         }
-    // after looping through all years, print the table and chart
+    // after looping through all years, generate the table
     $year_html_table = "  <table>
     <tr>
       <th style=\"width: 70px\">".t(1)."</th>
@@ -210,6 +201,14 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
     <canvas id=\"chart_years\"></canvas>
   </div>\n".$year_html_script);
     } else {
+        $tr1 = strpos($year_html_table, "</tr>");
+        $tr2 = strpos($year_html_table, "</tr>", $tr1 + 5);
+        $chart_row = "  <td rowspan=\"100\" style=\"vertical-align: top\">
+        <div id=\"div_years\" style=\"width: 650px; height: 320px\">
+          <canvas id=\"chart_years\"></canvas>
+        </div>
+      </td>\n    ";
+        $year_html_table = substr_replace($year_html_table, $chart_row, $tr2, 0);
         print($year_html_table.$year_html_script."  <br>\n");
     }
     // end debug timing for year chart
@@ -255,19 +254,10 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                     $self_consumption = "-";
                     $self_sufficiency = "-";    
                 }
-                // save values into array for chart & generate table rows and insert in first line the chart
+                // save values into array for chart & generate table rows
                 if ($solar > 0) {
                     $month_solar[] = $solar;
-                    if ($month_table == "") {
-                        $chart_row = "\n      <td rowspan=\"1000\" style=\"vertical-align: top\">
-        <div id=\"div_months\" style=\"width: 650px; height: 320px\">
-          <canvas id=\"chart_months\"></canvas>
-        </div>
-      </td>";
-                    } else {
-                        $chart_row = "";
-                    }
-                    $month_table = $month_table."    <tr>
+                    $month_table = "    <tr>
       <td>".date("m/Y", $month)."</td>
       <td>".$solar." kWh</td>
       <td>".$grid." kWh</td>
@@ -275,8 +265,8 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
       <td>".$supply." kWh</td>
       <td>".$own_consumption." kWh</td>
       <td>".$self_consumption." %</td>
-      <td>".$self_sufficiency." %</td>".$chart_row."
-    </tr>\n";
+      <td>".$self_sufficiency." %</td>
+    </tr>\n".$month_table;
                 } else {
                     $month_solar[] = "NaN";
                 }
@@ -295,7 +285,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
           }";
             $year = $year + 1;
         }
-    // after looping through all years, print the table and chart
+    // after looping through all years, generate the table
     $month_html_table = "  <table>
     <tr>
       <th style=\"width: 70px\">".t(10)."</th>
@@ -333,6 +323,14 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
     <canvas id=\"chart_months\"></canvas>
     </div>\n".$month_html_script);
     } else {
+        $tr1 = strpos($month_html_table, "</tr>");
+        $tr2 = strpos($month_html_table, "</tr>", $tr1 + 5);
+        $chart_row = "  <td rowspan=\"1000\" style=\"vertical-align: top\">
+        <div id=\"div_months\" style=\"width: 650px; height: 320px\">
+          <canvas id=\"chart_months\"></canvas>
+        </div>
+      </td>\n    ";
+        $month_html_table = substr_replace($month_html_table, $chart_row, $tr2, 0);
         print($month_html_table.$month_html_script."  <br>\n");
     }
     // end debug timing for month chart
@@ -373,19 +371,10 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                     $self_consumption = "-";
                     $self_sufficiency = "-";    
                 }
-                // save values into array for chart & generate table rows and insert in first line the chart
+                // save values into array for chart & generate table rows
                 if ($solar > 0) {
                     $day_solar[] = $solar;
-                    if ($day_table == "") {
-                        $chart_row = "\n      <td rowspan=\"1000\" style=\"vertical-align: top\">
-        <div id=\"div_days\" style=\"width: 650px; height: 320px\">
-          <canvas id=\"chart_days\"></canvas>
-        </div>
-      </td>";
-                    } else {
-                        $chart_row = "";
-                    }
-                    $day_table = $day_table."    <tr>
+                    $day_table = "    <tr>
       <td>".date("d.m.Y", strtotime($day['time']))."</td>
       <td>".$solar." kWh</td>
       <td>".$grid." kWh</td>
@@ -393,8 +382,8 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
       <td>".$supply." kWh</td>
       <td>".$own_consumption." kWh</td>
       <td>".$self_consumption." %</td>
-      <td>".$self_sufficiency." %</td>".$chart_row."
-    </tr>\n";
+      <td>".$self_sufficiency." %</td>
+    </tr>\n".$day_table;
                 } else {
                     $day_solar[] = "NaN";
                 }
@@ -412,7 +401,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
           }";
             $year = $year + 1;
         }
-    // after looping through all years, print the table and chart
+    // after looping through all years, generate the table
     $day_html_table = "  <table>
     <tr>
       <th style=\"width: 70px\">".t(18)."</th>
@@ -425,7 +414,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
       <th style=\"width: 90px\">".t(8)."</th>
       <th style=\"width: 710px\">".t(9)."</th>
     </tr>\n".$day_table."  </table>";
-    $day_html_script = "  <script>
+    $day_html_script = "\n  <script>
     new Chart(document.getElementById('chart_days'), {
       type: 'line',
       data: {
@@ -459,6 +448,14 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
     <canvas id=\"chart_days\"></canvas>
     </div>\n".$day_html_script);
     } else {
+        $tr1 = strpos($day_html_table, "</tr>");
+        $tr2 = strpos($day_html_table, "</tr>", $tr1 + 5);
+        $chart_row = "  <td rowspan=\"100000\" style=\"vertical-align: top\">
+        <div id=\"div_days\" style=\"width: 650px; height: 320px\">
+          <canvas id=\"chart_days\"></canvas>
+        </div>
+      </td>\n    ";
+        $day_html_table = substr_replace($day_html_table, $chart_row, $tr2, 0);
         print($day_html_table.$day_html_script."  <br>\n");
     }
     // end debug timing for day chart
@@ -466,6 +463,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
     }
 }
 
+// function for evaluating runtime
 if ($script_timing) {
     if (isset($year_time_start) && isset($year_time_end)) {
         $year_runtime = round(($year_time_end-$year_time_start)/1e+6, 0);
