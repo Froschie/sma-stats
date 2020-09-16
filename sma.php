@@ -359,10 +359,10 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
             $result = $database->query('SELECT spread(solar_total) AS solar, spread(bezug_total) AS grid, spread(consumption_total) AS consumption, spread(einspeisung_total) AS supply FROM totals WHERE time>='.$start_time.'s and time<'.$end_time.'s GROUP BY time(1d) tz(\'Europe/Berlin\')');
             $points = $result->getPoints();
             foreach ($points as $day) {
-                $solar = round($day['solar']/1000, 0);
-                $grid = round($day['grid']/1000, 0);
-                $consumption = round($day['consumption']/1000, 0);
-                $supply = round($day['supply']/1000, 0);
+                $solar = round($day['solar']/1000, 1);
+                $grid = round($day['grid']/1000, 1);
+                $consumption = round($day['consumption']/1000, 1);
+                $supply = round($day['supply']/1000, 1);
                 $own_consumption = $solar-$supply;
                 if ($solar > 0) {
                     $self_consumption = round(($own_consumption/$solar)*100, 0);
