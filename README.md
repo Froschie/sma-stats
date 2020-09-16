@@ -16,7 +16,7 @@ The "sma.php" script list and visualizes the [SMA Query](https://github.com/Fros
 | smadb_user | x | - | InfluxDB User |
 | smadb_pw | x | - | InfluxDB Password |
 | lang | x | x | Script output language selection. Possible values: "de" or "en". |
-| table_borders | x | x | Hides table borders in HTML tables is set to "no". |
+| table_borders | x | x | Hides table borders in HTML by setting it to "no". |
 | chart | x | x | Chart selection. Multiple values possible: "all", "year", "month" or "day". |
 | onlychart | - | x | Show only Chart graph(s) but no tables |
 | timing | - | x | Debug option to show script runtimes |
