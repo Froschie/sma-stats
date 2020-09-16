@@ -21,7 +21,7 @@ The "sma.php" script list and visualizes the [SMA Query](https://github.com/Fros
 | onlychart | - | x | Show only Chart graph(s) but no tables |
 | timing | - | x | Debug option to show script runtimes |
 
-Example request: `http://192.168.1.1:8001/sma.php?lang=de&table_borders=no&chart=monthday&timing`
+Example request: `http://192.168.1.1:8080/sma.php?lang=de&table_borders=no&chart=monthday&timing`
 
 
 ## Create a Docker Container
@@ -33,3 +33,12 @@ curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/Dockerfile
 curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/sma.php
 docker build --tag sma-stats .
 ```
+
+
+## Start Docker Container via Docker-Compose File
+```bash
+curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/docker-compose.yaml
+vi docker-compose.yaml
+docker-compose up -d
+```
+*Note: please adapt the parameters as needed! Don´t override your existing docker compose file!*
