@@ -24,6 +24,27 @@ The "sma.php" script list and visualizes the [SMA Query](https://github.com/Fros
 Example request: `http://192.168.1.1:8080/sma.php?lang=de&table_borders=no&chart=monthday&timing`
 
 
+## Electric Meter Statistics
+
+The "em.php" script list and visualizes the [Electric Meter](https://github.com/Froschie/electrical-meter) data from an Electric Meter Reader for yearly and monthly statistics.
+
+<img src="https://raw.githubusercontent.com/Froschie/sma-stats/master/em-stats.png" width="840" height="410" alt="EM Statistics Screenshot">
+
+| Option | Docker Env | URL Param | Description |
+| --- | --- | --- | --- |
+| emdb_ip | x | - | InfluxDB IP |
+| emdb_port | x | - | InfluxDB Port |
+| emdb_db | x | - | InfluxDB DB Name |
+| emdb_user | x | - | InfluxDB User |
+| emdb_pw | x | - | InfluxDB Password |
+| lang | x | x | Script output language selection. Possible values: "de" or "en". |
+| table_borders | x | x | Hides table borders in HTML by setting it to "no". |
+| chart | x | x | Chart selection. Multiple values possible: "all", "year" or "month". |
+| timing | - | x | Debug option to show script runtimes |
+
+Example request: `http://192.168.1.1:8080/em.php?lang=de&table_borders=no&chart=month&timing`
+
+
 ## Create a Docker Container
 
 ```bash
@@ -31,6 +52,7 @@ mkdir sma-stats
 cd sma-stats/
 curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/Dockerfile
 curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/sma.php
+curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/em.php
 docker build --tag sma-stats .
 ```
 
