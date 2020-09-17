@@ -28,7 +28,7 @@ Example request: `http://192.168.1.1:8080/sma.php?lang=de&table_borders=no&chart
 
 The "em.php" script list and visualizes the [Electric Meter](https://github.com/Froschie/electrical-meter) data from an Electric Meter Reader for yearly and monthly statistics.
 
-<img src="https://raw.githubusercontent.com/Froschie/sma-stats/master/em-stats.png" width="840" height="410" alt="EM Statistics Screenshot">
+<img src="https://raw.githubusercontent.com/Froschie/sma-stats/master/em-stats.png" width="840" height="337" alt="EM Statistics Screenshot">
 
 | Option | Docker Env | URL Param | Description |
 | --- | --- | --- | --- |
@@ -49,7 +49,7 @@ Example request: `http://192.168.1.1:8080/em.php?lang=de&table_borders=no&chart=
 
 The "em.php" script list and visualizes the [Water Meter](https://github.com/Froschie/water-meter) data from an Water Meter Reader for yearly, monthly and daily statistics.
 
-<img src="https://raw.githubusercontent.com/Froschie/sma-stats/master/wm-stats.png" width="840" height="410" alt="WM Statistics Screenshot">
+<img src="https://raw.githubusercontent.com/Froschie/sma-stats/master/wm-stats.png" width="498" height="410" alt="WM Statistics Screenshot">
 
 | Option | Docker Env | URL Param | Description |
 | --- | --- | --- | --- |
