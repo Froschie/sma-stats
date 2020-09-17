@@ -45,6 +45,28 @@ The "em.php" script list and visualizes the [Electric Meter](https://github.com/
 Example request: `http://192.168.1.1:8080/em.php?lang=de&table_borders=no&chart=month&timing`
 
 
+## Water Meter Statistics
+
+The "em.php" script list and visualizes the [Water Meter](https://github.com/Froschie/water-meter) data from an Water Meter Reader for yearly, monthly and daily statistics.
+
+<img src="https://raw.githubusercontent.com/Froschie/sma-stats/master/wm-stats.png" width="840" height="410" alt="WM Statistics Screenshot">
+
+| Option | Docker Env | URL Param | Description |
+| --- | --- | --- | --- |
+| wmdb_ip | x | - | InfluxDB IP |
+| wmdb_port | x | - | InfluxDB Port |
+| wmdb_db | x | - | InfluxDB DB Name |
+| wmdb_user | x | - | InfluxDB User |
+| wmdb_pw | x | - | InfluxDB Password |
+| lang | x | x | Script output language selection. Possible values: "de" or "en". |
+| table_borders | x | x | Hides table borders in HTML by setting it to "no". |
+| chart | x | x | Chart selection. Multiple values possible: "all", "year", "month" or "day". |
+| onlychart | - | x | Show only Chart graph(s) but no tables |
+| timing | - | x | Debug option to show script runtimes |
+
+Example request: `http://192.168.1.1:8080/wm.php?lang=de&table_borders=no&chart=monthday&timing`
+
+
 ## Create a Docker Container
 
 ```bash
@@ -53,6 +75,7 @@ cd sma-stats/
 curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/Dockerfile
 curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/sma.php
 curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/em.php
+curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/wm.php
 docker build --tag sma-stats .
 ```
 
