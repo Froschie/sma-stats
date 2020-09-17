@@ -13,6 +13,9 @@ $influx_sma_port = getenv('smadb_port');
 $influx_sma_db = getenv('smadb_db');
 $influx_sma_user = getenv('smadb_user');
 $influx_sma_pw = getenv('smadb_pw');
+if ($influx_sma_ip == "192.168.1.3" && $influx_sma_db == "SMA" && $influx_sma_port == "8086" && $influx_sma_user == "user" && $influx_sma_pw == "pw") {
+  exit("Missing SMA InfluxDB Parameters! Default values used!");
+}
 
 // load php influxdb plugin
 require __DIR__ . '/vendor/autoload.php';
