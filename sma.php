@@ -105,7 +105,7 @@ print("<!DOCTYPE html>
   <script src=\"charts.js\"></script>\n");
 
 // query first entry in database
-$result = $database->query('SELECT first(solar_total) from totals');
+$result = $database->query('SELECT first(solar_total) FROM totals tz(\'Europe/Berlin\')');
 $points = $result->getPoints();
 if (isset($points[0])) {
     $year_first = explode("-", $points[0]['time'])[0];
@@ -130,7 +130,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             $start_time = mktime(0, 0, 0, 1, 1, $year);
             $end_time = mktime(0, 0, 0, 1, 1, $year+1);
             // InfluxDB query
-            $result = $database->query('SELECT spread(solar_total) AS solar, spread(bezug_total) AS grid, spread(consumption_total) AS consumption, spread(einspeisung_total) AS supply FROM totals WHERE time >='.$start_time.'s and time<='.$end_time.'s');
+            $result = $database->query('SELECT spread(solar_total) AS solar, spread(bezug_total) AS grid, spread(consumption_total) AS consumption, spread(einspeisung_total) AS supply FROM totals WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
             $points = $result->getPoints();
             // extract queried values and round them to full kWh and calculate usage quotas
             $solar = round($points[0]['solar']/1000, 0);
@@ -239,7 +239,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                 $start_time = mktime(0, 0, 0, date("m", $month), 1, date("Y", $month));
                 $end_time = mktime(0, 0, 0, date("m", $month)+1, 1, date("Y", $month));
                 // InfluxDB query
-                $result = $database->query('SELECT spread(solar_total) AS solar, spread(bezug_total) AS grid, spread(consumption_total) AS consumption, spread(einspeisung_total) AS supply FROM totals WHERE time >='.$start_time.'s and time<='.$end_time.'s');
+                $result = $database->query('SELECT spread(solar_total) AS solar, spread(bezug_total) AS grid, spread(consumption_total) AS consumption, spread(einspeisung_total) AS supply FROM totals WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
                 $points = $result->getPoints();
                 // extract queried values and round them to full kWh and calculate usage quotas
                 $solar = round($points[0]['solar']/1000, 0);
