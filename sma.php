@@ -232,7 +232,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
             $month_solar = array();
             // define start and end time of the loop year
             $month = mktime(0, 0, 0, 1, 1, $year);
-            $end = mktime(0, 0, 0, $month_act+1, 1, $year);
+            $end = mktime(0, 0, 0, 1, 1, $year+1);
             // loop througl all month of the loop year
             while ($month < $end) {
                 // define start and end time of the month to query
