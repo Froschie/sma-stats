@@ -22,7 +22,7 @@ The "sma.php" script list and visualizes the [SMA Query](https://github.com/Fros
 | max_solar | x | x | Shows max. peak solar generation of 5min periode from year/month/day if set to "yes". |
 | timing | - | x | Debug option to show script runtimes |
 
-Example request: `http://192.168.1.1:8080/sma.php?lang=de&table_borders=no&chart=monthday&timing`
+Example request: `http://192.168.1.1:8080/sma.php?lang=de&table_borders=no&chart=monthday&timing&max_solar`
 
 
 ## Electric Meter Statistics
