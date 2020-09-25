@@ -19,6 +19,7 @@ The "sma.php" script list and visualizes the [SMA Query](https://github.com/Fros
 | table_borders | x | x | Hides table borders in HTML by setting it to "no". |
 | chart | x | x | Chart selection. Multiple values possible: "all", "year", "month" or "day". |
 | onlychart | - | x | Show only Chart graph(s) but no tables |
+| max_solar | x | x | Shows max. peak solar generation of 5min periode from year/month/day if set to "yes". |
 | timing | - | x | Debug option to show script runtimes |
 
 Example request: `http://192.168.1.1:8080/sma.php?lang=de&table_borders=no&chart=monthday&timing`
