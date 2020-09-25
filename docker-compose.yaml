@@ -25,4 +25,5 @@ services:
       - lang=en
       - table_borders=yes
       - chart=all
+      - max_solar=no
     restart: unless-stopped
