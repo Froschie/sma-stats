@@ -50,6 +50,15 @@ function t($id) {
     return $dict[$script_lang][$id];
 }
 
+// function to replace "." with "," for german output
+function d($value) {
+  global $script_lang;
+  if ($script_lang == "de") {
+      $value = str_replace(".", ",", $value);
+  }
+  return $value;
+}
+
 // table border value check
 switch(getenv('table_borders')) {
     case "no":
@@ -144,7 +153,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             // generate table rows
             $year_table = "    <tr>
       <td>".$year."</td>
-      <td>".$water." m³</td>
+      <td>".d($water)." m³</td>
     </tr>\n".$year_table;
             $year = $year + 1;
         }
@@ -234,7 +243,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                     $month_water[] = $water;
                     $month_table = "    <tr>
       <td>".date("m/Y", $month)."</td>
-      <td>".$water." m³</td>
+      <td>".d($water)." m³</td>
     </tr>\n".$month_table;
                 } else {
                     $month_water[] = "NaN";
@@ -329,7 +338,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                     $day_water[] = $water;
                     $day_table = "    <tr>
       <td>".date("d.m.Y", strtotime($day['time']))."</td>
-      <td>".$water." m³</td>
+      <td>".d($water)." m³</td>
     </tr>\n".$day_table;
                 } else {
                     $day_water[] = "NaN";
