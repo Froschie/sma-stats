@@ -49,6 +49,15 @@ function t($id) {
     return $dict[$script_lang][$id];
 }
 
+// function to replace "." with "," for german output
+function d($value) {
+  global $script_lang;
+  if ($script_lang == "de") {
+      $value = str_replace(".", ",", $value);
+  }
+  return $value;
+}
+
 // table border value check
 switch(getenv('table_borders')) {
     case "no":
@@ -437,11 +446,11 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                     $day_solar[] = $solar;
                     $day_table = "    <tr>
       <td>".date("d.m.Y", strtotime($day['time']))."</td>
-      <td>".$solar." kWh</td>
-      <td>".$grid." kWh</td>
-      <td>".$consumption." kWh</td>
-      <td>".$supply." kWh</td>
-      <td>".$own_consumption." kWh</td>
+      <td>".d($solar)." kWh</td>
+      <td>".d($grid)." kWh</td>
+      <td>".d($consumption)." kWh</td>
+      <td>".d($supply)." kWh</td>
+      <td>".d($own_consumption)." kWh</td>
       <td>".$self_consumption." %</td>
       <td>".$self_sufficiency." %</td>".$day_solar_max_html."
     </tr>\n".$day_table;
