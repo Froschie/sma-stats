@@ -317,12 +317,12 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                 // Electric Meter InfluxDB query
                 $result_em = $database_em->query('SELECT last(consumption) as last_grid FROM electric_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
                 $points_em = $result_em->getPoints();
-                $last_grid_em = d(round($points_em[0]['last_grid']/1000, 1));
+                $last_grid_em = round($points_em[0]['last_grid']/1000, 1);
                 $last_grid_em_time = date("d.m.Y H:i", strtotime($points_em[0]['time']));
                 // Electric Meter InfluxDB query
                 $result_em = $database_em->query('SELECT last(supply) as last_supply FROM electric_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
                 $points_em = $result_em->getPoints();
-                $last_supply_em = d(round($points_em[0]['last_supply']/1000, 1));
+                $last_supply_em = round($points_em[0]['last_supply']/1000, 1);
                 $last_supply_em_time = date("d.m.Y H:i", strtotime($points_em[0]['time']));
                 // SMA InfluxDB query
                 if ($sma_query) {
@@ -354,9 +354,9 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                     $month_table = "    <tr>
       <td>".date("m/Y", $month)."</td>
       <td>".$grid_em." kWh</td>
-      <td>".$last_grid_em." kWh (".$last_grid_em_time.")</td>
+      <td>".d($last_grid_em)." kWh (".$last_grid_em_time.")</td>
       <td>".$supply_em." kWh</td>
-      <td>".$last_supply_em." kWh (".$last_supply_em_time.")</td>\n".$month_table_temp_sma."    </tr>\n".$month_table;
+      <td>".d($last_supply_em)." kWh (".$last_supply_em_time.")</td>\n".$month_table_temp_sma."    </tr>\n".$month_table;
                 }
                 $month = strtotime("+1 month", $month);
             }
