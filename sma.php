@@ -84,35 +84,38 @@ if ($script_table_borders) {
 }
 
 // max solar production value check
+$script_max_solar = FALSE;
 switch(getenv('max_solar')) {
     case "yes":
         $script_max_solar = TRUE;
-        break;
-    default:
-        $script_max_solar = FALSE;
 }
 if (isset($_GET['max_solar'])) {
-    $script_max_solar = TRUE;
-} else {
-    $script_max_solar = FALSE;
+    if ($_GET['max_solar'] != "no") {
+        $script_max_solar = TRUE;
+    }
 }
 
 // solar times
+$script_time_solar = 0;
+if (getenv('time_solar') > 0) {
+    $script_time_solar = getenv('time_solar');
+}
 if (isset($_GET['time_solar'])) {
     if ($_GET['time_solar'] > 0) {
         $script_time_solar = $_GET['time_solar'];
     } else {
         $script_time_solar = 100;
     }
-} else {
-    $script_time_solar = 0;
 }
 
 // base line power (lowest power consumption during 5min)
+$script_base_line = FALSE;
+switch(getenv('baseline')) {
+  case "yes":
+      $script_base_line = TRUE;
+}
 if (isset($_GET['baseline'])) {
   $script_base_line = TRUE;
-} else {
-  $script_base_line = FALSE;
 }
 
 // chart value check
