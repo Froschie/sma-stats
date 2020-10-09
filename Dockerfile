@@ -21,3 +21,4 @@ ENV smadb_ip="192.168.1.3" smadb_port="8086" smadb_db="SMA" smadb_user="user" sm
 # copy scripts into the container
 ADD ./sma.php /var/www/html/sma.php
 ADD ./em.php /var/www/html/em.php
+ADD ./em.php /var/www/html/wm.php
