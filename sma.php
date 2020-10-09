@@ -104,9 +104,15 @@ if (isset($_GET['time_solar'])) {
     } else {
         $script_time_solar = 100;
     }
-    $script_max_solar = TRUE;
 } else {
     $script_time_solar = 0;
+}
+
+// base line power (lowest power consumption during 5min)
+if (isset($_GET['baseline'])) {
+  $script_base_line = TRUE;
+} else {
+  $script_base_line = FALSE;
 }
 
 // chart value check
@@ -447,18 +453,24 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                 $own_consumption = $solar-$supply;
                 if ($solar > 0) {
                     // check for maximul solar generation during 5min in day
-                    if ($script_max_solar) {
+                    if ($script_max_solar or $script_base_line or $script_time_solar > 0) {
                         // InfluxDB query
                         $start_time = strtotime($day['time']);
                         $end_time = strtotime("+1 day", $start_time);
-                        $result = $database->query('SELECT mean(solar_act) AS solar FROM actuals WHERE time >='.$start_time.'s and time<='.$end_time.'s GROUP BY time(5m) tz(\'Europe/Berlin\')');
+                        $result = $database->query('SELECT mean(solar_act) AS solar, mean(consumption_act) AS consumption FROM actuals WHERE time >='.$start_time.'s and time<='.$end_time.'s GROUP BY time(5m) tz(\'Europe/Berlin\')');
                         $points = $result->getPoints();
                         $day_solar_max = 0;
                         $day_first_solar_time = "";
                         $day_last_solar_time = "";
+                        $day_base_line = 100000;
+                        $day_solar_max_html = "";
+                        $day_solar_max_header = "";
                         foreach ($points as $value) {
                             if ($value['solar'] > $day_solar_max) {
                                 $day_solar_max = $value['solar'];
+                            }
+                            if ($value['consumption'] < $day_base_line && $value['consumption'] > 0 && $value['consumption'] != "") {
+                                $day_base_line = round($value['consumption'], 0);
                             }
                             if ($value['solar'] > $script_time_solar && $day_first_solar_time == "") {
                                 $day_first_solar_time = $value['time'];
@@ -467,8 +479,10 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                                 $day_last_solar_time = $value['time'];
                             }
                         }
-                        $day_solar_max_html = "\n      <td>".round($day_solar_max, 0)." W</td>";
-                        $day_solar_max_header = "\n      <th style=\"width: 90px\">".t(19)."</th>";
+                        if ($script_max_solar) {
+                            $day_solar_max_html = "\n      <td>".round($day_solar_max, 0)." W</td>";
+                            $day_solar_max_header = "\n      <th style=\"width: 90px\">".t(19)."</th>";
+                        }
                         if ($script_time_solar > 0) {
                             if ($day_first_solar_time != "") {
                                 $day_solar_max_html = $day_solar_max_html."\n      <td>".date("H:i", strtotime($day_first_solar_time))."</td>";
@@ -482,6 +496,14 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                             }
                             $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(20).$script_time_solar."W</th>
       <th style=\"width: 90px\">".t(21).$script_time_solar."W</th>";
+                        }
+                        if ($script_base_line) {
+                            if ($day_base_line != 100000) {
+                                $day_solar_max_html = $day_solar_max_html."\n      <td>".$day_base_line." W</td>";
+                            } else {
+                                $day_solar_max_html = $day_solar_max_html."\n      <td>---</td>";
+                            }
+                            $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(20)."</th>";
                         }
                     }
                     $self_consumption = round(($own_consumption/$solar)*100, 0);
