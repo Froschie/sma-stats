@@ -92,6 +92,8 @@ switch(getenv('max_solar')) {
 if (isset($_GET['max_solar'])) {
     if ($_GET['max_solar'] != "no") {
         $script_max_solar = TRUE;
+    } else {
+        $script_max_solar = FALSE;
     }
 }
 
@@ -103,6 +105,8 @@ if (getenv('time_solar') > 0) {
 if (isset($_GET['time_solar'])) {
     if ($_GET['time_solar'] > 0) {
         $script_time_solar = $_GET['time_solar'];
+    } elseif ($_GET['time_solar'] == 0) {
+        $script_time_solar = 0;
     } else {
         $script_time_solar = 100;
     }
@@ -111,11 +115,15 @@ if (isset($_GET['time_solar'])) {
 // base line power (lowest power consumption during 5min)
 $script_base_line = FALSE;
 switch(getenv('baseline')) {
-  case "yes":
-      $script_base_line = TRUE;
+    case "yes":
+        $script_base_line = TRUE;
 }
 if (isset($_GET['baseline'])) {
-  $script_base_line = TRUE;
+    if ($_GET['baseline'] != "no") {
+        $script_base_line = TRUE;
+    } else {
+        $script_base_line = FALSE;
+    }
 }
 
 // chart value check
@@ -125,17 +133,31 @@ if (isset($_GET['chart'])) {
 }
 
 // only chart output value check
+$script_onlychart = FALSE;
+switch(getenv('onlychart')) {
+  case "yes":
+      $script_onlychart = TRUE;
+}
 if (isset($_GET['onlychart'])) {
-    $script_onlychart = TRUE;
-} else {
-    $script_onlychart = FALSE;
+  if ($_GET['onlychart'] != "no") {
+      $script_onlychart = TRUE;
+  } else {
+      $script_onlychart = FALSE;
+  }
 }
 
 // only table output value check
+$script_onlytable = FALSE;
+switch(getenv('onlytable')) {
+  case "yes":
+      $script_onlytable = TRUE;
+}
 if (isset($_GET['onlytable'])) {
-  $script_onlytable = TRUE;
-} else {
-  $script_onlytable = FALSE;
+  if ($_GET['onlytable'] != "no") {
+      $script_onlytable = TRUE;
+  } else {
+      $script_onlytable = FALSE;
+  }
 }
 
 // actual dates
