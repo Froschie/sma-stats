@@ -20,6 +20,7 @@ The "sma.php" script list and visualizes the [SMA Query](https://github.com/Fros
 | chart | x | x | Chart selection. Multiple values possible: "all", "year", "month" or "day". |
 | onlychart | - | x | Show only Chart graph(s) but no tables |
 | max_solar | x | x | Shows max. peak solar generation of 5min periode from year/month/day if set to "yes". |
+| time_solar | - | x | Shows first and last time solar generation was over specified value. Default value = 100W. |
 | timing | - | x | Debug option to show script runtimes |
 
 Example request: `http://192.168.1.1:8080/sma.php?lang=de&table_borders=no&chart=monthday&timing&max_solar`
