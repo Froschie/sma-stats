@@ -23,8 +23,8 @@ $client = new InfluxDB\Client($influx_sma_ip, $influx_sma_port, $influx_sma_user
 $database = $client->selectDB($influx_sma_db);
 
 // language definition and value check
-$dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 12 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit', 18 => 'Tag', 19 => 'Max. 5min Solar');
-$dict['en'] = array(1 => 'Year', 2 => 'Solar', 3 => 'Grid', 4 => 'Consumption', 5 => 'Supply', 6 => 'Own Consumption', 7 => 'Self Consumption', 8 => 'Self Sufficiency', 9 => 'Chart', 10 => "Month", 11 => 'Solar Energy Generation per Year', 12 => 'Solar Energy per Months', 13 => 'Solar Energy per Day of the Year', 14 => 'Year Table Generation Time', 15 => 'Month Table Generation Time', 16 => 'Day Table Generation Time', 17 => 'Total Generation Time', 18 => 'Day', 19 => 'Peak 5min Solar');
+$dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 12 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit', 18 => 'Tag', 19 => 'Max. 5min Solar', 20 => 'Erste Zeit >', 21 => 'Letzte Zeit >');
+$dict['en'] = array(1 => 'Year', 2 => 'Solar', 3 => 'Grid', 4 => 'Consumption', 5 => 'Supply', 6 => 'Own Consumption', 7 => 'Self Consumption', 8 => 'Self Sufficiency', 9 => 'Chart', 10 => "Month", 11 => 'Solar Energy Generation per Year', 12 => 'Solar Energy per Months', 13 => 'Solar Energy per Day of the Year', 14 => 'Year Table Generation Time', 15 => 'Month Table Generation Time', 16 => 'Day Table Generation Time', 17 => 'Total Generation Time', 18 => 'Day', 19 => 'Peak 5min Solar', 20 => 'First time >', 21 => 'Last time >');
 switch(getenv('lang')) {
     case "en":
         $script_lang = "en";
@@ -95,6 +95,18 @@ if (isset($_GET['max_solar'])) {
     $script_max_solar = TRUE;
 } else {
     $script_max_solar = FALSE;
+}
+
+// solar times
+if (isset($_GET['time_solar'])) {
+    if ($_GET['time_solar'] > 0) {
+        $script_time_solar = $_GET['time_solar'];
+    } else {
+        $script_time_solar = 100;
+    }
+    $script_max_solar = TRUE;
+} else {
+    $script_time_solar = 0;
 }
 
 // chart value check
@@ -215,9 +227,11 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
       <th style=\"width: 90px\">".t(5)."</th>
       <th style=\"width: 90px\">".t(6)."</th>
       <th style=\"width: 90px\">".t(7)."</th>
-      <th style=\"width: 90px\">".t(8)."</th>".$year_solar_max_header."
-      <th style=\"width: 710px\">".t(9)."</th>
-    </tr>\n".$year_table."  </table>\n";
+      <th style=\"width: 90px\">".t(8)."</th>".$year_solar_max_header;
+    if (!$script_onlytable) {
+        $year_html_table = $year_html_table."\n      <th style=\"width: 710px\">".t(9)."</th>";
+    }
+    $year_html_table = $year_html_table."\n    </tr>\n".$year_table."  </table>\n";
     $year_html_script = "  <script>
     new Chart(document.getElementById('chart_years'), {
       type: 'bar',
@@ -358,9 +372,11 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
       <th style=\"width: 90px\">".t(5)."</th>
       <th style=\"width: 90px\">".t(6)."</th>
       <th style=\"width: 90px\">".t(7)."</th>
-      <th style=\"width: 90px\">".t(8)."</th>".$month_solar_max_header."
-      <th style=\"width: 710px\">".t(9)."</th>
-    </tr>\n".$month_table."  </table>\n";
+      <th style=\"width: 90px\">".t(8)."</th>".$month_solar_max_header;
+    if (!$script_onlytable) {
+        $month_html_table = $month_html_table."\n      <th style=\"width: 710px\">".t(9)."</th>";
+    }
+    $month_html_table = $month_html_table."\n    </tr>\n".$month_table."  </table>\n";
     $month_html_script = "  <script>
     new Chart(document.getElementById('chart_months'), {
       type: 'line',
@@ -438,13 +454,35 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                         $result = $database->query('SELECT mean(solar_act) AS solar FROM actuals WHERE time >='.$start_time.'s and time<='.$end_time.'s GROUP BY time(5m) tz(\'Europe/Berlin\')');
                         $points = $result->getPoints();
                         $day_solar_max = 0;
+                        $day_first_solar_time = "";
+                        $day_last_solar_time = "";
                         foreach ($points as $value) {
                             if ($value['solar'] > $day_solar_max) {
                                 $day_solar_max = $value['solar'];
                             }
+                            if ($value['solar'] > $script_time_solar && $day_first_solar_time == "") {
+                                $day_first_solar_time = $value['time'];
+                            }
+                            if ($value['solar'] > $script_time_solar) {
+                                $day_last_solar_time = $value['time'];
+                            }
                         }
                         $day_solar_max_html = "\n      <td>".round($day_solar_max, 0)." W</td>";
                         $day_solar_max_header = "\n      <th style=\"width: 90px\">".t(19)."</th>";
+                        if ($script_time_solar > 0) {
+                            if ($day_first_solar_time != "") {
+                                $day_solar_max_html = $day_solar_max_html."\n      <td>".date("H:i", strtotime($day_first_solar_time))."</td>";
+                            } else {
+                              $day_solar_max_html = $day_solar_max_html."\n      <td>---</td>";
+                            }
+                            if ($day_last_solar_time != "") {
+                              $day_solar_max_html = $day_solar_max_html."\n      <td>".date("H:i", strtotime($day_last_solar_time))."</td>";
+                            } else {
+                              $day_solar_max_html = $day_solar_max_html."\n      <td>---</td>";
+                            }
+                            $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(20).$script_time_solar."W</th>
+      <th style=\"width: 90px\">".t(21).$script_time_solar."W</th>";
+                        }
                     }
                     $self_consumption = round(($own_consumption/$solar)*100, 0);
                     $self_sufficiency = round(($own_consumption/$consumption)*100, 0);
@@ -492,9 +530,11 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
       <th style=\"width: 90px\">".t(5)."</th>
       <th style=\"width: 90px\">".t(6)."</th>
       <th style=\"width: 90px\">".t(7)."</th>
-      <th style=\"width: 90px\">".t(8)."</th>".$day_solar_max_header."
-      <th style=\"width: 710px\">".t(9)."</th>
-    </tr>\n".$day_table."  </table>";
+      <th style=\"width: 90px\">".t(8)."</th>".$day_solar_max_header;
+    if (!$script_onlytable) {
+        $day_html_table = $day_html_table."\n      <th style=\"width: 710px\">".t(9)."</th>";
+    }
+    $day_html_table = $day_html_table."\n    </tr>\n".$day_table."  </table>";
     $day_html_script = "\n  <script>
     new Chart(document.getElementById('chart_days'), {
       type: 'line',
