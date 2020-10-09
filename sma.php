@@ -110,6 +110,13 @@ if (isset($_GET['onlychart'])) {
     $script_onlychart = FALSE;
 }
 
+// only table output value check
+if (isset($_GET['onlytable'])) {
+  $script_onlytable = TRUE;
+} else {
+  $script_onlytable = FALSE;
+}
+
 // actual dates
 $year_act = date("Y");
 $month_act = date("m");
@@ -240,6 +247,8 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
         print("  <div id=\"div_years\" style=\"width: 650px; height: 320px\">
     <canvas id=\"chart_years\"></canvas>
   </div>\n".$year_html_script);
+    } elseif ($script_onlytable) {
+        print($year_html_table.$year_html_script."  <br>\n");
     } else {
         $tr1 = strpos($year_html_table, "</tr>");
         $tr2 = strpos($year_html_table, "</tr>", $tr1 + 5);
@@ -376,6 +385,8 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
         print("  <div id=\"div_months\" style=\"width: 650px; height: 320px\">
     <canvas id=\"chart_months\"></canvas>
     </div>\n".$month_html_script);
+    } elseif ($script_onlytable) {
+        print($month_html_table.$month_html_script."  <br>\n");
     } else {
         $tr1 = strpos($month_html_table, "</tr>");
         $tr2 = strpos($month_html_table, "</tr>", $tr1 + 5);
@@ -517,6 +528,8 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
         print("  <div id=\"div_days\" style=\"width: 650px; height: 320px\">
     <canvas id=\"chart_days\"></canvas>
     </div>\n".$day_html_script);
+    } elseif ($script_onlytable) {
+        print($day_html_table.$day_html_script."  <br>\n");
     } else {
         $tr1 = strpos($day_html_table, "</tr>");
         $tr2 = strpos($day_html_table, "</tr>", $tr1 + 5);
