@@ -28,4 +28,6 @@ services:
       - max_solar=no
       - baseline=no
       - time_solar=0
+      - onlychart=no
+      - onlytable=no
     restart: unless-stopped
