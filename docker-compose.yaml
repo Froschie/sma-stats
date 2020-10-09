@@ -26,4 +26,6 @@ services:
       - table_borders=yes
       - chart=all
       - max_solar=no
+      - baseline=no
+      - time_solar=0
     restart: unless-stopped
