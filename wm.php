@@ -105,6 +105,7 @@ $month_act = date("m");
 print("<!DOCTYPE html>
 <html>
 <head>
+  <title>sma-stats - Water Meter Statistics</title>
   <style>
     td {
       text-align: right;
