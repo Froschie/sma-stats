@@ -168,6 +168,7 @@ $month_act = date("m");
 print("<!DOCTYPE html>
 <html>
 <head>
+  <title>sma-stats - SMA Statistics</title>
   <style>
     td {
       text-align: right;
