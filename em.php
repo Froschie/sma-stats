@@ -120,6 +120,7 @@ $month_act = date("m");
 print("<!DOCTYPE html>
 <html>
 <head>
+  <title>sma-stats - Electric Meter Statistics</title>
   <style>
     td {
       text-align: right;
