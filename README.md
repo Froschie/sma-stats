@@ -24,9 +24,10 @@ The "sma.php" script list and visualizes the [SMA Query](https://github.com/Fros
 | time_solar | x | x | Shows column with first and last time solar generation was over specified value within 5min periode of the day. Only for day table! Default value = 100W. |
 | baseline | x | x | Shows colum for the smallest power consumption within 5min periode of the day. Only for day table! |
 | nogrid_time | x | x | Shows colum for the time where no power from grid is consumed. |
+| car_charging | x | x | Shows colum for possible kWh which could be used to charge a electric car having a definable minimum charging Watt level. |
 | timing | - | x | Debug option to show script runtimes |
 
-Example request: `http://192.168.1.1:8080/sma.php?lang=de&table_borders=no&chart=monthday&timing&max_solar&baseline&nogrid_time`
+Example request: `http://192.168.1.1:8080/sma.php?lang=de&table_borders=no&chart=monthday&timing&max_solar&baseline&nogrid_time&car_charging=1400`
 
 
 ## Electric Meter Statistics
