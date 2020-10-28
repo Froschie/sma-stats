@@ -23,8 +23,8 @@ $client = new InfluxDB\Client($influx_sma_ip, $influx_sma_port, $influx_sma_user
 $database = $client->selectDB($influx_sma_db);
 
 // language definition and value check
-$dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 12 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit', 18 => 'Tag', 19 => 'Max. 5min Solar', 20 => 'Erste Zeit >', 21 => 'Letzte Zeit >', 22 => 'Minimalster Strom Verbrauch', 23 => 'Zeit ohne Netzbezg');
-$dict['en'] = array(1 => 'Year', 2 => 'Solar', 3 => 'Grid', 4 => 'Consumption', 5 => 'Supply', 6 => 'Own Consumption', 7 => 'Self Consumption', 8 => 'Self Sufficiency', 9 => 'Chart', 10 => "Month", 11 => 'Solar Energy Generation per Year', 12 => 'Solar Energy per Months', 13 => 'Solar Energy per Day of the Year', 14 => 'Year Table Generation Time', 15 => 'Month Table Generation Time', 16 => 'Day Table Generation Time', 17 => 'Total Generation Time', 18 => 'Day', 19 => 'Peak 5min Solar', 20 => 'First time >', 21 => 'Last time >', 22 => 'Minium Power Consumption', 23 => 'Time without grid power');
+$dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 12 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit', 18 => 'Tag', 19 => 'Max. 5min Solar', 20 => 'Erste Zeit >', 21 => 'Letzte Zeit >', 22 => 'Minimalster Strom Verbrauch', 23 => 'Zeit ohne Netzbezg', 24 => 'Ladeleistung Auto >');
+$dict['en'] = array(1 => 'Year', 2 => 'Solar', 3 => 'Grid', 4 => 'Consumption', 5 => 'Supply', 6 => 'Own Consumption', 7 => 'Self Consumption', 8 => 'Self Sufficiency', 9 => 'Chart', 10 => "Month", 11 => 'Solar Energy Generation per Year', 12 => 'Solar Energy per Months', 13 => 'Solar Energy per Day of the Year', 14 => 'Year Table Generation Time', 15 => 'Month Table Generation Time', 16 => 'Day Table Generation Time', 17 => 'Total Generation Time', 18 => 'Day', 19 => 'Peak 5min Solar', 20 => 'First time >', 21 => 'Last time >', 22 => 'Minium Power Consumption', 23 => 'Time without grid power', 24 => 'Car charging power >');
 switch(getenv('lang')) {
     case "en":
         $script_lang = "en";
@@ -109,6 +109,17 @@ if (isset($_GET['time_solar'])) {
         $script_time_solar = 0;
     } else {
         $script_time_solar = 100;
+    }
+}
+
+// car charging
+$script_car_charging = 0;
+if (getenv('car_charging') > 0) {
+    $script_car_charging = getenv('car_charging');
+}
+if (isset($_GET['car_charging'])) {
+    if ($_GET['car_charging'] > 0) {
+        $script_car_charging = $_GET['car_charging'];
     }
 }
 
@@ -493,13 +504,15 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                 $own_consumption = $solar-$supply;
                 if ($solar > 0) {
                     // check for maximul solar generation during 5min in day
-                    if ($script_max_solar or $script_base_line or $script_time_solar > 0 or $script_nogrid_time) {
+                    if ($script_max_solar or $script_base_line or $script_time_solar > 0 or $script_nogrid_time or $script_car_charging > 0) {
                         // InfluxDB query
                         $start_time = strtotime($day['time']);
                         $end_time = strtotime("+1 day", $start_time);
-                        $result = $database->query('SELECT mean(solar_act) AS solar, mean(consumption_act) AS consumption, mean(bezug_act) as grid FROM actuals WHERE time >='.$start_time.'s and time<='.$end_time.'s GROUP BY time(5m) tz(\'Europe/Berlin\')');
+                        $result = $database->query('SELECT mean(solar_act) AS solar, mean(consumption_act) AS consumption, mean(bezug_act) as grid, mean(einspeisung_act) as supply FROM actuals WHERE time >='.$start_time.'s and time<='.$end_time.'s GROUP BY time(5m) tz(\'Europe/Berlin\')');
                         $points = $result->getPoints();
                         $day_nogrid_time = 0;
+                        $day_car_charging_time = 0;
+                        $day_car_charging_kwh = 0;
                         $day_solar_max = 0;
                         $day_first_solar_time = "";
                         $day_last_solar_time = "";
@@ -521,6 +534,10 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                             }
                             if (intval($value['grid']) == 0 && is_numeric($value['grid'])) {
                                 $day_nogrid_time = $day_nogrid_time + 5;
+                            }
+                            if ($value['supply'] >= $script_car_charging) {
+                                $day_car_charging_time = $day_car_charging_time + 5;
+                                $day_car_charging_kwh = $day_car_charging_kwh + ($value['supply']/12/1000);
                             }
                         }
                         if ($script_max_solar) {
@@ -550,9 +567,13 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                             $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(22)."</th>";
                         }
                         if ($script_nogrid_time) {
-                          $day_solar_max_html = "\n      <td>".$day_nogrid_time." min</td>";
-                          $day_solar_max_header = "\n      <th style=\"width: 90px\">".t(23)."</th>";
-                      }
+                          $day_solar_max_html = $day_solar_max_html."\n      <td>".$day_nogrid_time." min</td>";
+                          $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(23)."</th>";
+                        }
+                        if ($script_car_charging > 0) {
+                          $day_solar_max_html = $day_solar_max_html."\n      <td>".round($day_car_charging_kwh, 1)." kWh</td>";
+                          $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(24).$script_car_charging."W</th>";
+                        }
                     }
                     $self_consumption = round(($own_consumption/$solar)*100, 0);
                     $self_sufficiency = round(($own_consumption/$consumption)*100, 0);
