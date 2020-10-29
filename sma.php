@@ -232,7 +232,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             $start_time = mktime(0, 0, 0, 1, 1, $year);
             $end_time = mktime(0, 0, 0, 1, 1, $year+1);
             // InfluxDB query
-            $result = $database->query('SELECT spread(solar_total) AS solar, spread(bezug_total) AS grid, spread(consumption_total) AS consumption, spread(einspeisung_total) AS supply FROM totals WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
+            $result = $database->query('SELECT sum(solar_daily) AS solar, sum(bezug_daily) AS grid, sum(consumption_daily) AS consumption, sum(einspeisung_daily) AS supply FROM totals_daily  WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
             $points = $result->getPoints();
             // extract queried values and round them to full kWh and calculate usage quotas
             $solar = round($points[0]['solar']/1000, 0);
@@ -245,7 +245,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             // check for maximul solar generation during 5min in whole year
             if ($script_max_solar) {
                 // InfluxDB query
-                $result = $database->query('SELECT mean(solar_act) AS solar FROM actuals WHERE time >='.$start_time.'s and time<='.$end_time.'s GROUP BY time(5m) tz(\'Europe/Berlin\')');
+                $result = $database->query('SELECT max(solar_max) AS solar FROM totals_daily  WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
                 $points = $result->getPoints();
                 $year_solar_max = 0;
                 foreach ($points as $value) {
@@ -359,7 +359,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                 $start_time = mktime(0, 0, 0, date("m", $month), 1, date("Y", $month));
                 $end_time = mktime(0, 0, 0, date("m", $month)+1, 1, date("Y", $month));
                 // InfluxDB query
-                $result = $database->query('SELECT spread(solar_total) AS solar, spread(bezug_total) AS grid, spread(consumption_total) AS consumption, spread(einspeisung_total) AS supply FROM totals WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
+                $result = $database->query('SELECT sum(solar_daily) AS solar, sum(bezug_daily) AS grid, sum(consumption_daily) AS consumption, sum(einspeisung_daily) AS supply FROM totals_daily WHERE time >='.$start_time.'s and time<'.$end_time.'s tz(\'Europe/Berlin\')');
                 $points = $result->getPoints();
                 // extract queried values and round them to full kWh and calculate usage quotas
                 $solar = round($points[0]['solar']/1000, 0);
@@ -371,7 +371,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                     // check for maximul solar generation during 5min in whole month
                     if ($script_max_solar) {
                         // InfluxDB query
-                        $result = $database->query('SELECT mean(solar_act) AS solar FROM actuals WHERE time >='.$start_time.'s and time<='.$end_time.'s GROUP BY time(5m) tz(\'Europe/Berlin\')');
+                        $result = $database->query('SELECT max(solar_max) AS solar FROM totals_daily WHERE time >='.$start_time.'s and time<='.$end_time.'s GROUP BY time(5m) tz(\'Europe/Berlin\')');
                         $points = $result->getPoints();
                         $month_solar_max = 0;
                         foreach ($points as $value) {
@@ -494,9 +494,16 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
             $start_time = mktime(0, 0, 0, 1, 1, $year);
             $end_time = mktime(0, 0, 0, 1, 1, $year+1);
             // InfluxDB query for whole year incl. Timezone setting!
-            $result = $database->query('SELECT spread(solar_total) AS solar, spread(bezug_total) AS grid, spread(consumption_total) AS consumption, spread(einspeisung_total) AS supply FROM totals WHERE time>='.$start_time.'s and time<'.$end_time.'s GROUP BY time(1d) tz(\'Europe/Berlin\')');
+            $result = $database->query('SELECT solar_daily AS solar, bezug_daily AS grid, consumption_daily AS consumption, einspeisung_daily AS supply FROM totals_daily WHERE time>='.$start_time.'s and time<'.$end_time.'s tz(\'Europe/Berlin\')');
             $points = $result->getPoints();
+            $day_of_year = 0;
             foreach ($points as $day) {
+                $day_no = date("z", strtotime($day['time']));
+                while ($day_no > $day_of_year) {
+                    $day_solar[] = "NaN";
+                    $day_of_year = $day_of_year + 1;
+                }
+                $day_of_year = $day_of_year + 1;
                 $solar = round($day['solar']/1000, 1);
                 $grid = round($day['grid']/1000, 1);
                 $consumption = round($day['consumption']/1000, 1);
@@ -508,7 +515,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                         // InfluxDB query
                         $start_time = strtotime($day['time']);
                         $end_time = strtotime("+1 day", $start_time);
-                        $result = $database->query('SELECT mean(solar_act) AS solar, mean(consumption_act) AS consumption, mean(bezug_act) as grid, mean(einspeisung_act) as supply FROM actuals WHERE time >='.$start_time.'s and time<='.$end_time.'s GROUP BY time(5m) tz(\'Europe/Berlin\')');
+                        $result = $database->query('SELECT solar_5min AS solar, consumption_5min AS consumption, bezug_5min as grid, einspeisung_5min as supply FROM actuals_5min WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
                         $points = $result->getPoints();
                         $day_nogrid_time = 0;
                         $day_car_charging_time = 0;
@@ -594,8 +601,6 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
       <td>".$self_consumption." %</td>
       <td>".$self_sufficiency." %</td>".$day_solar_max_html."
     </tr>\n".$day_table;
-                } else {
-                    $day_solar[] = "NaN";
                 }
             }
             if ($day_chart != "") {
