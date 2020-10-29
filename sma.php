@@ -593,11 +593,11 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                           $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(23)."</th>";
                         }
                         if ($script_car_charging > 0) {
-                          $day_solar_max_html = $day_solar_max_html."\n      <td>".round($day_car_charging_kwh, 1)." kWh</td>";
+                          $day_solar_max_html = $day_solar_max_html."\n      <td>".d(round($day_car_charging_kwh, 1))." kWh</td>";
                           $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(24).$script_car_charging."W</th>";
                         }
                         if ($script_over_supply > 0) {
-                          $day_solar_max_html = $day_solar_max_html."\n      <td>".round($day_over_supply, 1)." kWh</td>";
+                          $day_solar_max_html = $day_solar_max_html."\n      <td>".d(round($day_over_supply, 1))." kWh</td>";
                           $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(25).$script_over_supply."W</th>";
                         }
                     }
