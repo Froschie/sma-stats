@@ -23,8 +23,8 @@ $client = new InfluxDB\Client($influx_sma_ip, $influx_sma_port, $influx_sma_user
 $database = $client->selectDB($influx_sma_db);
 
 // language definition and value check
-$dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 12 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit', 18 => 'Tag', 19 => 'Max. 5min Solar', 20 => 'Erste Zeit >', 21 => 'Letzte Zeit >', 22 => 'Minimalster Strom Verbrauch', 23 => 'Zeit ohne Netzbezg', 24 => 'Ladeleistung Auto >', 25 => 'Einspeisung über ');
-$dict['en'] = array(1 => 'Year', 2 => 'Solar', 3 => 'Grid', 4 => 'Consumption', 5 => 'Supply', 6 => 'Own Consumption', 7 => 'Self Consumption', 8 => 'Self Sufficiency', 9 => 'Chart', 10 => "Month", 11 => 'Solar Energy Generation per Year', 12 => 'Solar Energy per Months', 13 => 'Solar Energy per Day of the Year', 14 => 'Year Table Generation Time', 15 => 'Month Table Generation Time', 16 => 'Day Table Generation Time', 17 => 'Total Generation Time', 18 => 'Day', 19 => 'Peak 5min Solar', 20 => 'First time >', 21 => 'Last time >', 22 => 'Minium Power Consumption', 23 => 'Time without grid power', 24 => 'Car charging power >', 25 => 'Grid supply over ');
+$dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 12 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit', 18 => 'Tag', 19 => 'Max. 5min Solar', 20 => 'Erste Zeit >', 21 => 'Letzte Zeit >', 22 => 'Minimalster Strom Verbrauch', 23 => 'Zeit ohne Netzbezg', 24 => 'Ladeleistung Auto >', 25 => 'Einspeisung über ', 26 => 'Generierungzeit Stunden Tabelle', 27 => 'Monat / Stunde');
+$dict['en'] = array(1 => 'Year', 2 => 'Solar', 3 => 'Grid', 4 => 'Consumption', 5 => 'Supply', 6 => 'Own Consumption', 7 => 'Self Consumption', 8 => 'Self Sufficiency', 9 => 'Chart', 10 => "Month", 11 => 'Solar Energy Generation per Year', 12 => 'Solar Energy per Months', 13 => 'Solar Energy per Day of the Year', 14 => 'Year Table Generation Time', 15 => 'Month Table Generation Time', 16 => 'Day Table Generation Time', 17 => 'Total Generation Time', 18 => 'Day', 19 => 'Peak 5min Solar', 20 => 'First time >', 21 => 'Last time >', 22 => 'Minium Power Consumption', 23 => 'Time without grid power', 24 => 'Car charging power >', 25 => 'Grid supply over ', 26 => 'Hour Table Generation Time', 27 => 'Month / Hour');
 switch(getenv('lang')) {
     case "en":
         $script_lang = "en";
@@ -526,7 +526,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                         // InfluxDB query
                         $start_time = strtotime($day['time']);
                         $end_time = strtotime("+1 day", $start_time);
-                        $result = $database->query('SELECT solar_5min AS solar, consumption_5min AS consumption, bezug_5min as grid, einspeisung_5min as supply FROM actuals_5min WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
+                        $result = $database->query('SELECT solar_5min AS solar, consumption_5min AS consumption, bezug_5min as grid, einspeisung_5min as supply FROM actuals_5min WHERE time >='.$start_time.'s and time <='.$end_time.'s tz(\'Europe/Berlin\')');
                         $points = $result->getPoints();
                         $day_nogrid_time = 0;
                         $day_car_charging_time = 0;
@@ -701,6 +701,92 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
     }
 }
 
+// hour chart
+if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'hour') !== false) {
+    // only continue if really data is available in database
+    if (isset($year_first)) {
+        // start debug timing for month chart
+        $hour_time_start = hrtime(true);
+        // variable initialization
+        $year = $year_first;
+        $hour_array = array();
+        // loop for first to actual year
+        while ($year <= $year_act) {
+            // define start and end time of the loop year
+            $month = mktime(0, 0, 0, 1, 1, $year);
+            $end = mktime(0, 0, 0, 1, 1, $year+1);
+            // loop througl all month of the loop year
+            while ($month < $end) {
+                // define start and end time of the month to query
+                $start_time = mktime(0, 0, 0, date("m", $month), 1, date("Y", $month));
+                $end_time = mktime(0, 0, 0, date("m", $month)+1, 1, date("Y", $month));
+                // InfluxDB query
+                $result = $database->query('SELECT solar_5min AS solar FROM actuals_5min WHERE time >='.$start_time.'s and time <='.$end_time.'s tz(\'Europe/Berlin\')');
+                $points = $result->getPoints();
+                foreach ($points as $value) {
+                    $temp_month = date("n", strtotime($value['time']));
+                    $temp_hour = date("G", strtotime($value['time']));
+                    if (isset($hour_array[$temp_month][$temp_hour]['no_values'])) {
+                        $hour_array[$temp_month][$temp_hour]['no_values']++;
+                        $hour_array[$temp_month][$temp_hour]['value'] += $value['solar'];
+                    } else {
+                        $hour_array[$temp_month][$temp_hour]['no_values'] = 1;
+                        $hour_array[$temp_month][$temp_hour]['value'] = $value['solar'];
+                    }
+                }
+                $month = strtotime("+1 month", $month);
+            }
+            $year = $year + 1;
+        }
+        $hour_html_table = "  <table>
+        <tr>
+          <th style=\"width: 60px\">".t(27)."</th>
+          <th style=\"width: 40px\">00</th>
+          <th style=\"width: 40px\">01</th>
+          <th style=\"width: 40px\">02</th>
+          <th style=\"width: 40px\">03</th>
+          <th style=\"width: 40px\">04</th>
+          <th style=\"width: 40px\">05</th>
+          <th style=\"width: 40px\">06</th>
+          <th style=\"width: 40px\">07</th>
+          <th style=\"width: 40px\">08</th>
+          <th style=\"width: 40px\">09</th>
+          <th style=\"width: 40px\">10</th>
+          <th style=\"width: 40px\">11</th>
+          <th style=\"width: 40px\">12</th>
+          <th style=\"width: 40px\">13</th>
+          <th style=\"width: 40px\">14</th>
+          <th style=\"width: 40px\">15</th>
+          <th style=\"width: 40px\">16</th>
+          <th style=\"width: 40px\">17</th>
+          <th style=\"width: 40px\">18</th>
+          <th style=\"width: 40px\">19</th>
+          <th style=\"width: 40px\">20</th>
+          <th style=\"width: 40px\">21</th>
+          <th style=\"width: 40px\">22</th>
+          <th style=\"width: 40px\">23</th>
+        <tr>\n";
+        foreach (array_keys($hour_array) as $month) {
+            $hour_html_table = $hour_html_table."    <tr>
+          <td>".$month."</td>\n";
+            for ($hour = 0; $hour <= 23; $hour++) {
+                $hour_no_value = 0;
+                $hour_value = 0;
+                if ($hour_array[$month][$hour]['no_values'] > 0 && $hour_array[$month][$hour]['value'] > 0) {
+                    $hour_value = round($hour_array[$month][$hour]['value']/$hour_array[$month][$hour]['no_values'], 0);
+                }
+                $hour_html_table = $hour_html_table."            <td>".$hour_value."</td>\n";
+              }
+            $hour_html_table = $hour_html_table."    </tr>\n";
+        }
+        $hour_html_table = $hour_html_table."        </tr>
+      </table>\n";
+        print($hour_html_table."  <br>\n");
+    }
+    // end debug timing for day chart
+    $hour_time_end = hrtime(true);
+}
+
 // function for evaluating runtime
 if ($script_timing) {
     if (isset($year_time_start) && isset($year_time_end)) {
@@ -715,6 +801,10 @@ if ($script_timing) {
         $day_runtime = round(($day_time_end-$day_time_start)/1e+6, 0);
         print("  ".t(16).": ".$day_runtime."ms\n  <br>\n");
     }
+    if (isset($hour_time_start) && isset($hour_time_end)) {
+      $hour_runtime = round(($hour_time_end-$hour_time_start)/1e+6, 0);
+      print("  ".t(26).": ".$hour_runtime."ms\n  <br>\n");
+  }
     $script_time_end = hrtime(true);
     $script_runtime = round(($script_time_end-$script_time_start)/1e+6, 0);
     print("  ".t(17).": ".$script_runtime."ms\n  <br>\n");
