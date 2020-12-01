@@ -19,7 +19,7 @@ RUN curl -o /var/www/html/charts.js -L https://github.com/chartjs/Chart.js/relea
 RUN curl -o /var/www/html/moment.js -L https://momentjs.com/downloads/moment-with-locales.js
 
 # default Environment Variables  for Script
-ENV smadb_ip="192.168.1.3" smadb_port="8086" smadb_db="SMA" smadb_user="user" smadb_pw="pw" lang="en" table_borders="yes" chart="all" emdb_ip="192.168.1.3" emdb_port="8086" emdb_db="measurements" emdb_user="user" emdb_pw="pw" baseline="no" time_solar=0 max_solar="no" onlytable="no" onlychart="no"
+ENV smadb_ip="192.168.1.3" smadb_port="8086" smadb_db="SMA" smadb_user="user" smadb_pw="pw" lang="en" table_borders="yes" chart="all" emdb_ip="192.168.1.3" emdb_port="8086" emdb_db="measurements" emdb_user="user" emdb_pw="pw" baseline="no" time_solar=0 max_solar="no" days=0 onlytable="no" onlychart="no"
 
 # copy scripts into the container
 ADD ./sma.php /var/www/html/sma.php

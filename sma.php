@@ -112,6 +112,17 @@ if (isset($_GET['time_solar'])) {
     }
 }
 
+// days for day table
+$script_days = 0;
+if (getenv('days') > 0) {
+    $script_days = getenv('days');
+}
+if (isset($_GET['days'])) {
+    if ($_GET['days'] > 0) {
+        $script_days = $_GET['days'];
+    }
+}
+
 // car charging
 $script_car_charging = 0;
 if (getenv('car_charging') > 0) {
@@ -497,6 +508,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
         $year = $year_first;
         $day_chart = "";
         $day_table = "";
+        $day_actual = new DateTime();
         // loop for first to actual year
         while ($year <= $year_act) {
             // variable initialization
@@ -609,8 +621,12 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                 }
                 // save values into array for chart & generate table rows
                 if ($solar > 0) {
+                    $day_count++;
                     $day_solar[] = $solar;
-                    $day_table = "    <tr>
+                    $day_current_item = new DateTime($day['time']);
+                    $day_difference = $day_current_item->diff($day_actual);
+                    if ($day_difference->days < $script_days or $script_days == 0) {
+                        $day_table = "    <tr>
       <td>".date("d.m.Y", strtotime($day['time']))."</td>
       <td>".d($solar)." kWh</td>
       <td>".d($grid)." kWh</td>
@@ -620,6 +636,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
       <td>".$self_consumption." %</td>
       <td>".$self_sufficiency." %</td>".$day_solar_max_html."
     </tr>\n".$day_table;
+                    }
                 }
             }
             if ($day_chart != "") {

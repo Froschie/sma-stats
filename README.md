@@ -25,6 +25,7 @@ The "sma.php" script list and visualizes the [SMA Query](https://github.com/Fros
 | baseline | x | x | Shows colum for the smallest power consumption within 5min periode of the day. Only for day table! |
 | nogrid_time | x | x | Shows colum for the time where no power from grid is consumed. |
 | car_charging | x | x | Shows colum for possible kWh which could be used to charge a electric car having a definable minimum charging Watt level. |
+| days | x | x | Show only defined number of days in day table (0 = all). |
 | over_supply | x | x | Shows colum for power supply to grid which is above a defined limit. |
 | timing | - | x | Debug option to show script runtimes |
 
