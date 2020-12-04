@@ -27,6 +27,7 @@ The "sma.php" script list and visualizes the [SMA Query](https://github.com/Fros
 | car_charging | x | x | Shows colum for possible kWh which could be used to charge a electric car having a definable minimum charging Watt level. |
 | days | x | x | Show only defined number of days in day table (0 = all). |
 | over_supply | x | x | Shows colum for power supply to grid which is above a defined limit. |
+| nounits | x | x | Hide the units ("W" / "kWh") from the tables. To hide set to "yes". |
 | timing | - | x | Debug option to show script runtimes |
 
 Example request: `http://192.168.1.1:8080/sma.php?lang=de&table_borders=no&chart=monthday&timing&max_solar&baseline&nogrid_time&car_charging=1400&over_supply=3000`

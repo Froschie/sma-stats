@@ -173,6 +173,19 @@ if (isset($_GET['baseline'])) {
     }
 }
 
+// hide unit description in table
+$unit_kwh = " kWh";
+$unit_w = " W";
+switch(getenv('nounits')) {
+    case "yes":
+        $unit_kwh = "";
+        $unit_w = "";
+}
+if (isset($_GET['nounits'])) {
+    $unit_kwh = "";
+    $unit_w = "";
+}
+
 // chart value check
 $script_chart = getenv('chart');
 if (isset($_GET['chart'])) {
@@ -275,7 +288,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
                         $year_solar_max = $value['solar'];
                     }
                 }
-                $year_solar_max_html = "\n      <td>".round($year_solar_max, 0)." W</td>";
+                $year_solar_max_html = "\n      <td>".round($year_solar_max, 0).$unit_w."</td>";
                 $year_solar_max_header = "\n      <th style=\"width: 90px\">".t(19)."</th>";
             }
             // save values into array for chart
@@ -284,11 +297,11 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             // generate table rows
             $year_table = "    <tr>
       <td>".$year."</td>
-      <td>".$solar." kWh</td>
-      <td>".$grid." kWh</td>
-      <td>".$consumption." kWh</td>
-      <td>".$supply." kWh</td>
-      <td>".$own_consumption." kWh</td>
+      <td>".$solar.$unit_kwh."</td>
+      <td>".$grid.$unit_kwh."</td>
+      <td>".$consumption.$unit_kwh."</td>
+      <td>".$supply.$unit_kwh."</td>
+      <td>".$own_consumption.$unit_kwh."</td>
       <td>".$self_consumption." %</td>
       <td>".$self_sufficiency." %</td>".$year_solar_max_html."
     </tr>\n".$year_table;
@@ -401,7 +414,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                                 $month_solar_max = $value['solar'];
                             }
                         }
-                        $month_solar_max_html = "\n      <td>".round($month_solar_max, 0)." W</td>";
+                        $month_solar_max_html = "\n      <td>".round($month_solar_max, 0).$unit_w."</td>";
                         $month_solar_max_header = "\n      <th style=\"width: 90px\">".t(19)."</th>";
                     }
                     $self_consumption = round(($own_consumption/$solar)*100, 0);
@@ -415,11 +428,11 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                     $month_solar[] = $solar;
                     $month_table = "    <tr>
       <td>".date("m/Y", $month)."</td>
-      <td>".$solar." kWh</td>
-      <td>".$grid." kWh</td>
-      <td>".$consumption." kWh</td>
-      <td>".$supply." kWh</td>
-      <td>".$own_consumption." kWh</td>
+      <td>".$solar.$unit_kwh."</td>
+      <td>".$grid.$unit_kwh."</td>
+      <td>".$consumption.$unit_kwh."</td>
+      <td>".$supply.$unit_kwh."</td>
+      <td>".$own_consumption.$unit_kwh."</td>
       <td>".$self_consumption." %</td>
       <td>".$self_sufficiency." %</td>".$month_solar_max_html."
     </tr>\n".$month_table;
@@ -575,7 +588,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                           }
                         }
                         if ($script_max_solar) {
-                            $day_solar_max_html = "\n      <td>".round($day_solar_max, 0)." W</td>";
+                            $day_solar_max_html = "\n      <td>".round($day_solar_max, 0).$unit_w."</td>";
                             $day_solar_max_header = "\n      <th style=\"width: 90px\">".t(19)."</th>";
                         }
                         if ($script_time_solar > 0) {
@@ -594,7 +607,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                         }
                         if ($script_base_line) {
                             if ($day_base_line != 100000) {
-                                $day_solar_max_html = $day_solar_max_html."\n      <td>".$day_base_line." W</td>";
+                                $day_solar_max_html = $day_solar_max_html."\n      <td>".$day_base_line.$unit_w."</td>";
                             } else {
                                 $day_solar_max_html = $day_solar_max_html."\n      <td>---</td>";
                             }
@@ -605,12 +618,12 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                             $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(23)."</th>";
                         }
                         if ($script_car_charging > 0) {
-                            $day_solar_max_html = $day_solar_max_html."\n      <td>".d(round($day_car_charging_kwh, 1))." kWh</td>";
-                            $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(24).$script_car_charging."W</th>";
+                            $day_solar_max_html = $day_solar_max_html."\n      <td>".d(round($day_car_charging_kwh, 1)).$unit_kwh."</td>";
+                            $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(24).$script_car_charging.$unit_w."</th>";
                         }
                         if ($script_over_supply > 0) {
-                            $day_solar_max_html = $day_solar_max_html."\n      <td>".d(round($day_over_supply, 1))." kWh</td>";
-                            $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(25).$script_over_supply."W</th>";
+                            $day_solar_max_html = $day_solar_max_html."\n      <td>".d(round($day_over_supply, 1)).$unit_kwh."</td>";
+                            $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(25).$script_over_supply.$unit_w."</th>";
                         }
                     }
                     $self_consumption = round(($own_consumption/$solar)*100, 0);
@@ -628,11 +641,11 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                     if ($day_difference->days < $script_days or $script_days == 0) {
                         $day_table = "    <tr>
       <td>".date("d.m.Y", strtotime($day['time']))."</td>
-      <td>".d($solar)." kWh</td>
-      <td>".d($grid)." kWh</td>
-      <td>".d($consumption)." kWh</td>
-      <td>".d($supply)." kWh</td>
-      <td>".d($own_consumption)." kWh</td>
+      <td>".d($solar).$unit_kwh."</td>
+      <td>".d($grid).$unit_kwh."</td>
+      <td>".d($consumption).$unit_kwh."</td>
+      <td>".d($supply).$unit_kwh."</td>
+      <td>".d($own_consumption).$unit_kwh."</td>
       <td>".$self_consumption." %</td>
       <td>".$self_sufficiency." %</td>".$day_solar_max_html."
     </tr>\n".$day_table;

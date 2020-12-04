@@ -29,6 +29,7 @@ services:
       - baseline=no
       - time_solar=0
       - days=0
+      - nounits=no
       - onlychart=no
       - onlytable=no
     restart: unless-stopped
