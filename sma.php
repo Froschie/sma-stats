@@ -118,7 +118,7 @@ if (getenv('days') > 0) {
     $script_days = getenv('days');
 }
 if (isset($_GET['days'])) {
-    if ($_GET['days'] > 0) {
+    if ($_GET['days'] >= 0) {
         $script_days = $_GET['days'];
     }
 }

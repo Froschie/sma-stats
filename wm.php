@@ -26,7 +26,7 @@ $database_wm = $client_wm->selectDB($influx_wm_db);
 // language definition and value check
 $dict['de'] = array(1 => 'Jahr', 2 => 'Wasser', 3 => 'Wasserverbrauch pro Jahr', 4 => 'Grafik', 5 => 'Generierungzeit Jahres Tabelle', 6 => 'Generierungzeit Monats Tabelle', 7 => 'Generierungzeit Tages Tabelle', 8 => 'Gesamt Generierungzeit', 9 => 'Monat', 10 => 'Wasserverbrauch je Monat', 11 => 'Tag', 12 => 'Wasserverbrauch je Tag');
 $dict['en'] = array(1 => 'Year', 2 => 'Water', 3 => 'Water usage per Year', 4 => 'Chart', 5 => 'Year Table Generation Time', 6 => 'Month Table Generation Time', 7 => 'Day Table Generation Time', 8 => 'Total Generation Time', 9 => 'Month', 10 => 'Water usage per Month', 11 => 'Day', 12 => 'Water usage per Day');
-switch(getenv('lang')) {
+switch(getenv('wmlang')) {
     case "en":
         $script_lang = "en";
         break;
@@ -60,7 +60,7 @@ function d($value) {
 }
 
 // table border value check
-switch(getenv('table_borders')) {
+switch(getenv('wmtable_borders')) {
     case "no":
         $script_table_borders = FALSE;
         break;
@@ -85,7 +85,7 @@ if ($script_table_borders) {
 }
 
 // chart value check
-$script_chart = getenv('chart');
+$script_chart = getenv('wmchart');
 if (isset($_GET['chart'])) {
     $script_chart = $_GET['chart'];
 }
@@ -95,6 +95,17 @@ if (isset($_GET['onlychart'])) {
     $script_onlychart = TRUE;
 } else {
     $script_onlychart = FALSE;
+}
+
+// days for day table
+$script_days = 0;
+if (getenv('wmdays') > 0) {
+    $script_days = getenv('wmdays');
+}
+if (isset($_GET['days'])) {
+    if ($_GET['days'] >= 0) {
+        $script_days = $_GET['days'];
+    }
 }
 
 // actual dates
@@ -226,7 +237,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
             $month_water = array();
             // define start and end time of the loop year
             $month = mktime(0, 0, 0, 1, 1, $year);
-            $end = mktime(0, 0, 0, $month_act+1, 1, $year);
+            $end = mktime(0, 0, 0, 1, 1, $year+1);
             // loop througl all month of the loop year
             while ($month < $end) {
                 // define start and end time of the month to query
@@ -321,6 +332,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
         $year = $year_first;
         $day_chart = "";
         $day_table = "";
+        $day_actual = new DateTime();
         // loop for first to actual year
         while ($year <= $year_act) {
             // variable initialization
@@ -336,11 +348,16 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                 $water = $day['water']/1000;
                 // save values into array for chart & generate table rows
                 if ($water > 0) {
+                    $day_count++;
                     $day_water[] = $water;
-                    $day_table = "    <tr>
+                    $day_current_item = new DateTime($day['time']);
+                    $day_difference = $day_current_item->diff($day_actual);
+                    if ($day_difference->days < $script_days or $script_days == 0) {
+                      $day_table = "    <tr>
       <td>".date("d.m.Y", strtotime($day['time']))."</td>
       <td>".d($water)." m³</td>
     </tr>\n".$day_table;
+                    }
                 } else {
                     $day_water[] = "NaN";
                 }

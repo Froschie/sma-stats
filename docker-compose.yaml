@@ -17,11 +17,6 @@ services:
       - emdb_db=measurements
       - emdb_user=user
       - emdb_pw=pw
-      - wmdb_ip=192.168.1.3
-      - wmdb_port=8086
-      - wmdb_db=measurements
-      - wmdb_user=user
-      - wmdb_pw=pw
       - lang=en
       - table_borders=yes
       - chart=all
@@ -32,4 +27,14 @@ services:
       - nounits=no
       - onlychart=no
       - onlytable=no
+      - wmdb_ip=192.168.1.3
+      - wmdb_port=8086
+      - wmdb_db=measurements
+      - wmdb_user=user
+      - wmdb_pw=pw
+      - wmlang=en
+      - wmtable_borders=yes
+      - wmchart=all
+      - wmonlychart=no
+      - wmdays=14
     restart: unless-stopped

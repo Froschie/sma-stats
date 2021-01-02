@@ -67,10 +67,11 @@ The "em.php" script list and visualizes the [Water Meter](https://github.com/Fro
 | wmdb_db | x | - | InfluxDB DB Name |
 | wmdb_user | x | - | InfluxDB User |
 | wmdb_pw | x | - | InfluxDB Password |
-| lang | x | x | Script output language selection. Possible values: "de" or "en". |
-| table_borders | x | x | Hides table borders in HTML by setting it to "no". |
-| chart | x | x | Chart selection. Multiple values possible: "all", "year", "month" or "day". |
+| lang | wmlang | x | Script output language selection. Possible values: "de" or "en". |
+| table_borders | wmtable_borders | x | Hides table borders in HTML by setting it to "no". |
+| chart | wmchart | x | Chart selection. Multiple values possible: "all", "year", "month" or "day". |
 | onlychart | - | x | Show only Chart graph(s) but no tables |
+| days | wmdays | x | Show only defined number of days in day table (0 = all). |
 | timing | - | x | Debug option to show script runtimes |
 
 Example request: `http://192.168.1.1:8080/wm.php?lang=de&table_borders=no&chart=monthday&timing`
