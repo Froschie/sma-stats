@@ -118,7 +118,7 @@ if (getenv('days') > 0) {
     $script_days = getenv('days');
 }
 if (isset($_GET['days'])) {
-    if ($_GET['days'] > 0) {
+    if ($_GET['days'] >= 0) {
         $script_days = $_GET['days'];
     }
 }
@@ -266,6 +266,8 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             // define start and end time of the year to query
             $start_time = mktime(0, 0, 0, 1, 1, $year);
             $end_time = mktime(0, 0, 0, 1, 1, $year+1);
+            $year_solar_max_html = "";
+            $year_solar_max_header = "";
             // InfluxDB query
             $result = $database->query('SELECT sum(solar_daily) AS solar, sum(bezug_daily) AS grid, sum(consumption_daily) AS consumption, sum(einspeisung_daily) AS supply FROM totals_daily  WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
             $points = $result->getPoints();
@@ -393,6 +395,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                 // define start and end time of the month to query
                 $start_time = mktime(0, 0, 0, date("m", $month), 1, date("Y", $month));
                 $end_time = mktime(0, 0, 0, date("m", $month)+1, 1, date("Y", $month));
+                $month_solar_max_html = "";
                 $month_solar_max_header = "";
                 // InfluxDB query
                 $result = $database->query('SELECT sum(solar_daily) AS solar, sum(bezug_daily) AS grid, sum(consumption_daily) AS consumption, sum(einspeisung_daily) AS supply FROM totals_daily WHERE time >='.$start_time.'s and time<'.$end_time.'s tz(\'Europe/Berlin\')');
@@ -551,6 +554,8 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                 $consumption = round($day['consumption']/1000, 1);
                 $supply = round($day['supply']/1000, 1);
                 $own_consumption = $solar-$supply;
+                $day_solar_max_html = "";
+                $day_solar_max_header = "";
                 if ($solar > 0) {
                     // check for maximul solar generation during 5min in day
                     if ($script_max_solar or $script_base_line or $script_time_solar > 0 or $script_nogrid_time or $script_car_charging > 0 or $script_over_supply > 0) {
@@ -567,8 +572,6 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                         $day_first_solar_time = "";
                         $day_last_solar_time = "";
                         $day_base_line = 100000;
-                        $day_solar_max_html = "";
-                        $day_solar_max_header = "";
                         foreach ($points as $value) {
                             if ($value['solar'] > $day_solar_max) {
                                 $day_solar_max = $value['solar'];
