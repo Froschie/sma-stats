@@ -1,6 +1,9 @@
 # Take latest PHP Image with Apache
 FROM php:apache
 
+# Image Description
+LABEL version="1.0" description="Script to visualize statistics about SMA Inverter and other meters."
+
 # Unzip is requirement to install composer
 RUN apt-get update && apt-get install -y unzip
 
