@@ -240,6 +240,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
             $end = mktime(0, 0, 0, 1, 1, $year+1);
             // loop througl all month of the loop year
             while ($month < $end) {
+                $water = 0;
                 // define start and end time of the month to query
                 $start_time = mktime(0, 0, 0, date("m", $month), 1, date("Y", $month));
                 $end_time = mktime(0, 0, 0, date("m", $month)+1, 1, date("Y", $month));
@@ -247,7 +248,9 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                 $result_wm = $database_wm->query('SELECT sum(l) AS water FROM water_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
                 $points_wm = $result_wm->getPoints();
                 // extract queried values
-                $water = $points_wm[0]['water']/1000;
+                if (isset($points_wm[0]['water'])) {
+                    $water = $points_wm[0]['water']/1000;
+                }
                 // save values into array for chart
                 $year_array[] = $year;
                 // generate table rows
@@ -332,6 +335,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
         $year = $year_first;
         $day_chart = "";
         $day_table = "";
+        $day_count = 0;
         $day_actual = new DateTime();
         // loop for first to actual year
         while ($year <= $year_act) {

@@ -187,7 +187,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
                 $year_own_consumption[] = $own_consumption;
                 $self_consumption = round(($own_consumption/$solar_sma)*100, 0);
                 $self_sufficiency = round(($own_consumption/$consumption_sma)*100, 0);
-                $year_table_temp_sma = $year_table_temp."      <td>".$solar_sma." kWh</td>
+                $year_table_temp_sma = "      <td>".$solar_sma." kWh</td>
       <td>".$grid_sma." kWh</td>
       <td>".$consumption_sma." kWh</td>
       <td>".$supply_sma." kWh</td>
@@ -312,28 +312,51 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
             $result_em = $database_em->query('SELECT spread(consumption) AS grid, spread(supply) AS supply, last(consumption) as last_grid, last(supply) as last_supply FROM electric_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
             $points_em = $result_em->getPoints();
             // extract queried values
-            $grid_em = round($points_em[0]['grid']/1000, 0);
-            $supply_em = round($points_em[0]['supply']/1000, 0);
+            if (isset($points_em[0])) {
+                $grid_em = round($points_em[0]['grid']/1000, 0);
+                $supply_em = round($points_em[0]['supply']/1000, 0);
+            } else {
+                $grid_em = 0;
+                $supply_em = 0;
+            }
             // Electric Meter InfluxDB query
             $result_em = $database_em->query('SELECT last(consumption) as last_grid FROM electric_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
             $points_em = $result_em->getPoints();
-            $last_grid_em = round($points_em[0]['last_grid']/1000, 1);
-            $last_grid_em_time = date("d.m.Y H:i", strtotime($points_em[0]['time']));
+            if (isset($points_em[0])) {
+                $last_grid_em = round($points_em[0]['last_grid']/1000, 1);
+                $last_grid_em_time = date("d.m.Y H:i", strtotime($points_em[0]['time']));
+            } else {
+                $last_grid_em = 0;
+                $last_grid_em_time = 0;
+            }
             // Electric Meter InfluxDB query
             $result_em = $database_em->query('SELECT last(supply) as last_supply FROM electric_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
             $points_em = $result_em->getPoints();
-            $last_supply_em = round($points_em[0]['last_supply']/1000, 1);
-            $last_supply_em_time = date("d.m.Y H:i", strtotime($points_em[0]['time']));
+            if (isset($points_em[0])) {
+                $last_supply_em = round($points_em[0]['last_supply']/1000, 1);
+                $last_supply_em_time = date("d.m.Y H:i", strtotime($points_em[0]['time']));
+            } else {
+                $last_supply_em = 0;
+                $last_supply_em_time = 0;
+            }
             // SMA InfluxDB query
             if ($sma_query) {
                 $result_sma = $database_sma->query('SELECT spread(solar_total) AS solar, spread(bezug_total) AS grid, spread(consumption_total) AS consumption, spread(einspeisung_total) AS supply FROM totals WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
                 $points_sma = $result_sma->getPoints();
                 // save values into array for chart
-                $solar_sma = round($points_sma[0]['solar']/1000, 0);
-                $grid_sma = round($points_sma[0]['grid']/1000, 0);
-                $consumption_sma = round($points_sma[0]['consumption']/1000, 0);
-                $supply_sma = round($points_sma[0]['supply']/1000, 0);
-                $own_consumption = $solar_sma-$supply_sma;
+                if (isset($points_sma[0])) {
+                    $solar_sma = round($points_sma[0]['solar']/1000, 0);
+                    $grid_sma = round($points_sma[0]['grid']/1000, 0);
+                    $consumption_sma = round($points_sma[0]['consumption']/1000, 0);
+                    $supply_sma = round($points_sma[0]['supply']/1000, 0);
+                    $own_consumption = $solar_sma-$supply_sma;
+                } else {
+                  $solar_sma = 0;
+                  $grid_sma = 0;
+                  $consumption_sma = 0;
+                  $supply_sma = 0;
+                  $own_consumption = 0;
+                }
                 if ($solar_sma > 0) {
                     $self_consumption = round(($own_consumption/$solar_sma)*100, 0);
                     $self_sufficiency = round(($own_consumption/$consumption_sma)*100, 0);
@@ -341,7 +364,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                     $self_consumption = "-";
                     $self_sufficiency = "-";    
                 }
-                $month_table_temp_sma = $month_table_temp."      <td>".$solar_sma." kWh</td>
+                $month_table_temp_sma = "      <td>".$solar_sma." kWh</td>
         <td>".$grid_sma." kWh</td>
         <td>".$consumption_sma." kWh</td>
         <td>".$supply_sma." kWh</td>

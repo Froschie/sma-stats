@@ -23,7 +23,7 @@ $client = new InfluxDB\Client($influx_sma_ip, $influx_sma_port, $influx_sma_user
 $database = $client->selectDB($influx_sma_db);
 
 // language definition and value check
-$dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 12 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit', 18 => 'Tag', 19 => 'Max. 5min Solar', 20 => 'Erste Zeit >', 21 => 'Letzte Zeit >', 22 => 'Minimalster Strom Verbrauch', 23 => 'Zeit ohne Netzbezg', 24 => 'Ladeleistung Auto >', 25 => 'Einspeisung über ', 26 => 'Generierungzeit Stunden Tabelle', 27 => 'Monat / Stunde');
+$dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 13 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit', 18 => 'Tag', 19 => 'Max. 5min Solar', 20 => 'Erste Zeit >', 21 => 'Letzte Zeit >', 22 => 'Minimalster Strom Verbrauch', 23 => 'Zeit ohne Netzbezg', 24 => 'Ladeleistung Auto >', 25 => 'Einspeisung über ', 26 => 'Generierungzeit Stunden Tabelle', 27 => 'Monat / Stunde');
 $dict['en'] = array(1 => 'Year', 2 => 'Solar', 3 => 'Grid', 4 => 'Consumption', 5 => 'Supply', 6 => 'Own Consumption', 7 => 'Self Consumption', 8 => 'Self Sufficiency', 9 => 'Chart', 10 => "Month", 11 => 'Solar Energy Generation per Year', 12 => 'Solar Energy per Months', 13 => 'Solar Energy per Day of the Year', 14 => 'Year Table Generation Time', 15 => 'Month Table Generation Time', 16 => 'Day Table Generation Time', 17 => 'Total Generation Time', 18 => 'Day', 19 => 'Peak 5min Solar', 20 => 'First time >', 21 => 'Last time >', 22 => 'Minium Power Consumption', 23 => 'Time without grid power', 24 => 'Car charging power >', 25 => 'Grid supply over ', 26 => 'Hour Table Generation Time', 27 => 'Month / Hour');
 switch(getenv('lang')) {
     case "en":
@@ -118,7 +118,7 @@ if (getenv('days') > 0) {
     $script_days = getenv('days');
 }
 if (isset($_GET['days'])) {
-    if ($_GET['days'] >= 0) {
+    if ($_GET['days'] > 0) {
         $script_days = $_GET['days'];
     }
 }
@@ -393,15 +393,20 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                 // define start and end time of the month to query
                 $start_time = mktime(0, 0, 0, date("m", $month), 1, date("Y", $month));
                 $end_time = mktime(0, 0, 0, date("m", $month)+1, 1, date("Y", $month));
+                $month_solar_max_header = "";
                 // InfluxDB query
                 $result = $database->query('SELECT sum(solar_daily) AS solar, sum(bezug_daily) AS grid, sum(consumption_daily) AS consumption, sum(einspeisung_daily) AS supply FROM totals_daily WHERE time >='.$start_time.'s and time<'.$end_time.'s tz(\'Europe/Berlin\')');
                 $points = $result->getPoints();
                 // extract queried values and round them to full kWh and calculate usage quotas
-                $solar = round($points[0]['solar']/1000, 0);
-                $grid = round($points[0]['grid']/1000, 0);
-                $consumption = round($points[0]['consumption']/1000, 0);
-                $supply = round($points[0]['supply']/1000, 0);
-                $own_consumption = $solar-$supply;
+                if (isset($points[0]['solar'])) {
+                    $solar = round($points[0]['solar']/1000, 0);
+                    $grid = round($points[0]['grid']/1000, 0);
+                    $consumption = round($points[0]['consumption']/1000, 0);
+                    $supply = round($points[0]['supply']/1000, 0);
+                    $own_consumption = $solar-$supply;
+                } else {
+                    $solar = 0;
+                }
                 if ($solar > 0) {
                     // check for maximul solar generation during 5min in whole month
                     if ($script_max_solar) {
@@ -533,6 +538,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
             $result = $database->query('SELECT solar_daily AS solar, bezug_daily AS grid, consumption_daily AS consumption, einspeisung_daily AS supply FROM totals_daily WHERE time>='.$start_time.'s and time<'.$end_time.'s tz(\'Europe/Berlin\')');
             $points = $result->getPoints();
             $day_of_year = 0;
+            $day_count = 0;
             foreach ($points as $day) {
                 $day_no = date("z", strtotime($day['time']));
                 while ($day_no > $day_of_year) {
