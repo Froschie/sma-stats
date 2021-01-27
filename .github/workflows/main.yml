@@ -31,8 +31,9 @@ jobs:
         run: |
           DOCKER_IMAGE=froschie/sma-stats
           VERSION=1.0
-          echo ::set-output name=BUILD_DATE::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-          echo ::set-output name=VERSION::${VERSION}
+          echo ::set-output name=build_date::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          echo ::set-output name=version::${VERSION}
+          echo ::set-output name=docker_image::${DOCKER_IMAGE}
       -
         name: Login to DockerHub
         uses: docker/login-action@v1
@@ -48,17 +49,17 @@ jobs:
           file: ./Dockerfile
           platforms: linux/arm/v7,linux/amd64
           tags: |
-            docker.io/froschie/sma-stats:${{ steps.prepare.outputs.VERSION }}
+            docker.io/froschie/sma-stats:${{ steps.prepare.outputs.version }}
             docker.io/froschie/sma-stats:latest
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
             org.opencontainers.image.source=${{ github.event.repository.html_url }}
             org.opencontainers.image.url=${{ github.event.repository.html_url }}
             org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.version=${{ steps.prepare.outputs.VERSION }}
-            org.opencontainers.image.created=${{ steps.prepare.outputs.BUILD_DATE }}
+            org.opencontainers.image.version=${{ steps.prepare.outputs.version }}
+            org.opencontainers.image.created=${{ steps.prepare.outputs.build_date }}
       -
         name: Inspect image
         if: always() && github.event_name != 'pull_request'
         run: |
-          docker buildx imagetools inspect ${{ steps.prepare.outputs.DOCKER_IMAGE }}:${{ steps.prepare.outputs.VERSION }}
+          docker buildx imagetools inspect ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }}
