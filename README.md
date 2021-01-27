@@ -1,10 +1,10 @@
-# sma-stats
-Script to visualize statistics about SMA Inverter and other meters.
+# sma-stats ![Docker Hub Docker Hub Image](https://github.com/Froschie/sma-stats/workflows/Docker%20Image%20sma-stats%20build/badge.svg)
 
+Script to visualize statistics about SMA Inverter and other meters.  
 
-## SMA Statistics
+## SMA Statistics  
 
-The "sma.php" script list and visualizes the [SMA Query](https://github.com/Froschie/sma-query) data from the SMA Inverter for year, month and daily statistics.
+The "sma.php" script list and visualizes the [SMA Query](https://github.com/Froschie/sma-query) data from the SMA Inverter for year, month and daily statistics.  
 
 <img src="https://raw.githubusercontent.com/Froschie/sma-stats/master/sma-stats.png" width="840" height="410" alt="SMA Statistics Screenshot">
 
@@ -75,6 +75,59 @@ The "em.php" script list and visualizes the [Water Meter](https://github.com/Fro
 | timing | - | x | Debug option to show script runtimes |
 
 Example request: `http://192.168.1.1:8080/wm.php?lang=de&table_borders=no&chart=monthday&timing`
+
+
+## Start Docker Container  
+
+Pull latest Image:  
+`docker pull froschie/sma-stats:latest`  
+
+Start Container:  
+```
+docker run -it --rm \
+ -p 8080:80
+ -e smadb_ip=192.168.1.3
+ -e smadb_port=8086
+ -e smadb_db=SMA
+ -e smadb_user=user
+ -e smadb_pw=pw
+ -e emdb_ip=192.168.1.3
+ -e emdb_port=8086
+ -e emdb_db=measurements
+ -e emdb_user=user
+ -e emdb_pw=pw
+ -e lang=en
+ -e table_borders=yes
+ -e chart=all
+ -e max_solar=no
+ -e baseline=no
+ -e time_solar=0
+ -e days=0
+ -e nounits=no
+ -e onlychart=no
+ -e onlytable=no
+ -e wmdb_ip=192.168.1.3
+ -e wmdb_port=8086
+ -e wmdb_db=measurements
+ -e wmdb_user=user
+ -e wmdb_pw=pw
+ -e wmlang=en
+ -e wmtable_borders=yes
+ -e wmchart=all
+ -e wmonlychart=no
+ -e wmdays=14
+ froschie/sma-stats
+```
+*Note: please adapt the parameters as needed and replace "-it --rm" with "-d" to run it permanently or use docker-compose!*  
+
+
+## Start Docker Container via Docker-Compose  
+```bash
+curl -O https://raw.githubusercontent.com/Froschie/sma-pvoutput/main/docker-compose.yaml
+vi docker-compose.yaml
+docker-compose up -d
+```
+*Note: please adapt the parameters as needed!*
 
 
 ## Create a Docker Container

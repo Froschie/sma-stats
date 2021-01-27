@@ -2,7 +2,7 @@ version: '3'
 
 services:
   sma-stats:
-    image: sma-stats:latest
+    image: froschie/sma-stats:latest
     container_name: sma-stats
     ports:
       - 8080:80
