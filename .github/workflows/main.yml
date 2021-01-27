@@ -61,4 +61,4 @@ jobs:
         name: Inspect image
         if: always() && github.event_name != 'pull_request'
         run: |
-          docker buildx imagetools inspect ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }}
+          docker buildx imagetools inspect ${{ steps.prepare.outputs.DOCKER_IMAGE }}:${{ steps.prepare.outputs.VERSION }}
