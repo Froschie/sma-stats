@@ -1,4 +1,4 @@
-# sma-stats ![Docker Hub Docker Hub Image](https://github.com/Froschie/sma-stats/workflows/Docker%20Image%20sma-stats%20build/badge.svg)
+# sma-stats ![Docker Hub Image](https://github.com/Froschie/sma-stats/workflows/Docker%20Image%20sma-stats%20build/badge.svg)
 
 Script to visualize statistics about SMA Inverter and other meters.  
 

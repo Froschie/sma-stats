@@ -30,32 +30,33 @@ jobs:
         id: prepare
         run: |
           DOCKER_IMAGE=froschie/sma-stats
-          DOCKER_PLATFORMS=linux/arm/v7,linux/amd64
           VERSION=1.0
-          TAGS="--tag ${DOCKER_IMAGE}:${VERSION} --tag ${DOCKER_IMAGE}:latest"
-          echo ::set-output name=docker_image::${DOCKER_IMAGE}
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=buildx_args::--platform ${DOCKER_PLATFORMS} \
-            --build-arg VERSION=${VERSION} \
-            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
-            --build-arg VCS_REF=${GITHUB_SHA::8} \
-            ${TAGS} --file ./Dockerfile ./
-      -
-        name: Docker Buildx (build)
-        run: |
-          docker buildx build --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
+          echo ::set-output name=BUILD_DATE::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          echo ::set-output name=VERSION::${VERSION}
       -
         name: Login to DockerHub
-        if: success() && github.event_name != 'pull_request'
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      -
-        name: Docker Buildx (push)
-        if: success() && github.event_name != 'pull_request'
-        run: |
-          docker buildx build --output "type=image,push=true" ${{ steps.prepare.outputs.buildx_args }}
+      - name: Publish multi-arch image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ./Dockerfile
+          platforms: linux/arm/v7,linux/amd64
+          tags: |
+            docker.io/froschie/sma-stats:${{ steps.prepare.outputs.VERSION }}
+            docker.io/froschie/sma-stats:latest
+          labels: |
+            org.opencontainers.image.title=${{ github.event.repository.name }}
+            org.opencontainers.image.source=${{ github.event.repository.html_url }}
+            org.opencontainers.image.url=${{ github.event.repository.html_url }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.prepare.outputs.VERSION }}
+            org.opencontainers.image.created=${{ steps.prepare.outputs.BUILD_DATE }}
       -
         name: Inspect image
         if: always() && github.event_name != 'pull_request'
