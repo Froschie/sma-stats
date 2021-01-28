@@ -30,7 +30,7 @@ jobs:
         id: prepare
         run: |
           DOCKER_IMAGE=froschie/sma-stats
-          VERSION=1.0
+          VERSION=1.1
           echo ::set-output name=build_date::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=docker_image::${DOCKER_IMAGE}

@@ -398,7 +398,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                 $month_solar_max_html = "";
                 $month_solar_max_header = "";
                 // InfluxDB query
-                $result = $database->query('SELECT sum(solar_daily) AS solar, sum(bezug_daily) AS grid, sum(consumption_daily) AS consumption, sum(einspeisung_daily) AS supply FROM totals_daily WHERE time >='.$start_time.'s and time<'.$end_time.'s tz(\'Europe/Berlin\')');
+                $result = $database->query('SELECT sum(solar_daily) AS solar, max(solar_max) AS solar_max, sum(bezug_daily) AS grid, sum(consumption_daily) AS consumption, sum(einspeisung_daily) AS supply FROM totals_daily WHERE time >='.$start_time.'s and time<'.$end_time.'s tz(\'Europe/Berlin\')');
                 $points = $result->getPoints();
                 // extract queried values and round them to full kWh and calculate usage quotas
                 if (isset($points[0]['solar'])) {
@@ -407,21 +407,13 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                     $consumption = round($points[0]['consumption']/1000, 0);
                     $supply = round($points[0]['supply']/1000, 0);
                     $own_consumption = $solar-$supply;
+                    $month_solar_max = $points[0]['solar_max'];
                 } else {
                     $solar = 0;
                 }
                 if ($solar > 0) {
                     // check for maximul solar generation during 5min in whole month
                     if ($script_max_solar) {
-                        // InfluxDB query
-                        $result = $database->query('SELECT max(solar_max) AS solar FROM totals_daily WHERE time >='.$start_time.'s and time<='.$end_time.'s GROUP BY time(5m) tz(\'Europe/Berlin\')');
-                        $points = $result->getPoints();
-                        $month_solar_max = 0;
-                        foreach ($points as $value) {
-                            if ($value['solar'] > $month_solar_max) {
-                                $month_solar_max = $value['solar'];
-                            }
-                        }
                         $month_solar_max_html = "\n      <td>".round($month_solar_max, 0).$unit_w."</td>";
                         $month_solar_max_header = "\n      <th style=\"width: 90px\">".t(19)."</th>";
                     }
