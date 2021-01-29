@@ -174,7 +174,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             $year_supply_em[] = $supply_em;
             // SMA InfluxDB query
             if ($sma_query) {
-                $result_sma = $database_sma->query('SELECT spread(solar_total) AS solar, spread(bezug_total) AS grid, spread(consumption_total) AS consumption, spread(einspeisung_total) AS supply FROM totals WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
+                $result_sma = $database_sma->query('SELECT sum(solar_daily) AS solar, sum(bezug_daily) AS grid, sum(consumption_daily) AS consumption, sum(einspeisung_daily) AS supply FROM totals_daily WHERE time >='.$start_time.'s and time<'.$end_time.'s tz(\'Europe/Berlin\')');
                 $points_sma = $result_sma->getPoints();
                 // save values into array for chart
                 $solar_sma = round($points_sma[0]['solar']/1000, 0);
@@ -341,7 +341,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
             }
             // SMA InfluxDB query
             if ($sma_query) {
-                $result_sma = $database_sma->query('SELECT spread(solar_total) AS solar, spread(bezug_total) AS grid, spread(consumption_total) AS consumption, spread(einspeisung_total) AS supply FROM totals WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
+                $result_sma = $database_sma->query('SELECT sum(solar_daily) AS solar, sum(bezug_daily) AS grid, sum(consumption_daily) AS consumption, sum(einspeisung_daily) AS supply FROM totals_daily WHERE time >='.$start_time.'s and time<'.$end_time.'s tz(\'Europe/Berlin\')');
                 $points_sma = $result_sma->getPoints();
                 // save values into array for chart
                 if (isset($points_sma[0])) {
