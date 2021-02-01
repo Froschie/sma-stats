@@ -127,7 +127,7 @@ print("<!DOCTYPE html>
   </style>
 </head>
 <body>
-  <script src=\"charts.js\"></script>\n");
+  <script src=\"echarts.js\"></script>\n");
 
 // query first entry in database_wm$database_wm
 $result_em = $database_wm->query('SELECT first(l) FROM water_meter tz(\'Europe/Berlin\')');
@@ -176,42 +176,51 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
       <th style=\"width: 90px\">".t(2)."</th>
       <th style=\"width: 710px\">".t(4)."</th>
     </tr>\n".$year_table."  </table>\n";
-    $year_html_script = "  <script>
-    new Chart(document.getElementById('chart_years'), {
-      type: 'bar',
-      data: {
-        labels: ".json_encode(array_values($year_array)).",
-        datasets: [
-          {
-            label: '".t(2)." m³',
-            backgroundColor: '#0000ff',
-            fill: true,
-            data: ".json_encode(array_values($year_water))."
-          }
-        ]
+  $year_html_script = "  <script type=\"text/javascript\">
+  var myChart = echarts.init(document.getElementById('div_years'));
+  var option = {
+      title: {
+          text: '".t(3)."',
+          textStyle: {
+              fontSize: 14
+          },
+          left: 'center'
       },
-      options: {
-        scales: { yAxes: [ { ticks: { beginAtZero: true } } ] },
-        legend: { display: false },
-        title: {
-          display: true,
-          text: '".t(3)."'
-        }
-      }
-    });
-  </script>\n";
+      tooltip: {
+          trigger: 'axis'
+      },
+      grid: {
+          top: '35px',
+          left: '5px',
+          right: '5px',
+          bottom: '5px',
+          containLabel: true
+      },
+      xAxis: {
+          type: 'category',
+          data: ".json_encode(array_values($year_array))."
+      },
+      yAxis: {
+          type: 'value'
+      },
+      series: [{
+          data: ".json_encode(array_values($year_water)).",
+          type: 'bar',
+          itemStyle: {
+                  color: '#0000ff'
+          }
+      }]
+  };
+  myChart.setOption(option);
+</script>\n";
     // output selection of table or only chart
     if ($script_onlychart) {
-        print("  <div id=\"div_years\" style=\"width: 650px; height: 320px\">
-    <canvas id=\"chart_years\"></canvas>
-  </div>\n".$year_html_script);
+        print("  <div id=\"div_years\" style=\"width: 650px; height: 320px\"></div>\n".$year_html_script);
     } else {
         $tr1 = strpos($year_html_table, "</tr>");
         $tr2 = strpos($year_html_table, "</tr>", $tr1 + 5);
         $chart_row = "  <td rowspan=\"100\" style=\"vertical-align: top\">
-        <div id=\"div_years\" style=\"width: 650px; height: 320px\">
-          <canvas id=\"chart_years\"></canvas>
-        </div>
+        <div id=\"div_years\" style=\"width: 650px; height: 320px\"></div>
       </td>\n    ";
         $year_html_table = substr_replace($year_html_table, $chart_row, $tr2, 0);
         print($year_html_table.$year_html_script."  <br>\n");
@@ -261,7 +270,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
       <td>".d($water)." m³</td>
     </tr>\n".$month_table;
                 } else {
-                    $month_water[] = "NaN";
+                    $month_water[] = "";
                 }
                 $month = strtotime("+1 month", $month);
             }
@@ -269,13 +278,18 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                 $month_chart = $month_chart.",";
             }
             $month_chart = $month_chart."
-          {
-            label: '".$year."',
-            data: ".json_encode(array_values($month_water)).",
-            fill: false,
-            borderColor: '#0000".dechex(255-($year-$year_first)*7)."',
-            backgroundColor: '#0000".dechex(255-($year-$year_first)*7)."'
-          }";
+            {
+              name: '".$year."',
+              data: ".json_encode(array_values($month_water)).",
+              type: 'line',
+              smooth: true,
+              itemStyle: {
+                  color: '#0000".dechex(255-($year-$year_first)*7)."'
+              },
+              emphasis: {
+                  focus: 'series'
+              }
+            }";
             $year = $year + 1;
         }
     // after looping through all years, generate the table
@@ -285,37 +299,45 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
       <th style=\"width: 90px\">".t(2)."</th>
       <th style=\"width: 710px\">".t(4)."</th>
     </tr>\n".$month_table."  </table>\n";
-    $month_html_script = "  <script>
-    new Chart(document.getElementById('chart_months'), {
-      type: 'line',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        datasets: [".$month_chart."
-        ]
+    $month_html_script = "  <script type=\"text/javascript\">
+  var myChart = echarts.init(document.getElementById('div_months'));
+  var option = {
+      title: {
+          text: '".t(10)."',
+          textStyle: {
+              fontSize: 14
+          },
+          left: 'center'
       },
-      options: {
-        scales: { yAxes: [ { ticks: { beginAtZero: true } } ] },
-        legend: { display: true },
-        title: {
-          display: true,
-          text: '".t(10)."'
-        },
-        spanGaps: false
-      }
-    });
-  </script>\n";
+      tooltip: {
+          trigger: 'axis'
+      },
+      grid: {
+          top: '35px',
+          left: '5px',
+          right: '5px',
+          bottom: '5px',
+          containLabel: true
+      },
+      xAxis: {
+          type: 'category',
+          data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      },
+      yAxis: {
+          type: 'value'
+      },
+      series: [".$month_chart."]
+  };
+  myChart.setOption(option);
+</script>\n";
     // output selection of table or only chart
     if ($script_onlychart) {
-        print("  <div id=\"div_months\" style=\"width: 650px; height: 320px\">
-    <canvas id=\"chart_months\"></canvas>
-    </div>\n".$month_html_script);
+      print("  <div id=\"div_months\" style=\"width: 650px; height: 320px\"></div>\n".$month_html_script);
     } else {
         $tr1 = strpos($month_html_table, "</tr>");
         $tr2 = strpos($month_html_table, "</tr>", $tr1 + 5);
         $chart_row = "  <td rowspan=\"1000\" style=\"vertical-align: top\">
-        <div id=\"div_months\" style=\"width: 650px; height: 320px\">
-          <canvas id=\"chart_months\"></canvas>
-        </div>
+        <div id=\"div_months\" style=\"width: 650px; height: 320px\"></div>
       </td>\n    ";
         $month_html_table = substr_replace($month_html_table, $chart_row, $tr2, 0);
         print($month_html_table.$month_html_script."  <br>\n");
@@ -353,7 +375,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                 // save values into array for chart & generate table rows
                 if ($water > 0) {
                     $day_count++;
-                    $day_water[] = $water;
+                    $day_water[] = [date("2020-m-d", strtotime($day['time'])), $water];
                     $day_current_item = new DateTime($day['time']);
                     $day_difference = $day_current_item->diff($day_actual);
                     if ($day_difference->days < $script_days or $script_days == 0) {
@@ -363,19 +385,24 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
     </tr>\n".$day_table;
                     }
                 } else {
-                    $day_water[] = "NaN";
+                    $day_water[] = [date("2020-01-z", strtotime($day['time'])), ""];
                 }
             }
             if ($day_chart != "") {
                 $day_chart = $day_chart.",";
             }
             $day_chart = $day_chart."
-          {
-            label: '".$year."',
-            data: ".json_encode(array_values($day_water)).",
-            fill: false,
-            borderColor: '#0000".dechex(255-($year-$year_first)*7)."',
-            backgroundColor: '#0000".dechex(255-($year-$year_first)*7)."'
+            {
+              name: '".$year."',
+              data: ".json_encode(array_values($day_water)).",
+              type: 'line',
+              smooth: true,
+                  itemStyle: {
+                      color: '#0000".dechex(255-($year-$year_first)*7)."'
+                  },
+                  emphasis: {
+                      focus: 'series'
+                  }
           }";
             $year = $year + 1;
         }
@@ -386,46 +413,58 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
       <th style=\"width: 90px\">".t(2)."</th>
       <th style=\"width: 710px\">".t(4)."</th>
     </tr>\n".$day_table."  </table>";
-    $day_html_script = "\n  <script>
-    new Chart(document.getElementById('chart_days'), {
-      type: 'line',
-      data: {
-        labels: ['1'";
-    for ($i = 2 ; $i < 367; $i++){ $day_html_script = $day_html_script.",'".$i."'"; }
-    $day_html_script = $day_html_script."],
-        datasets: [".$day_chart."
-        ]
+  $day_html_script = "\n  <script type=\"text/javascript\">
+  var myChart = echarts.init(document.getElementById('div_days'));
+  var option = {
+      title: {
+          text: '".t(12)."',
+          textStyle: {
+              fontSize: 14
+          },
+          left: 'center'
       },
-      options: {
-        scales: { 
-          yAxes: [ { ticks: { beginAtZero: true } } ]
-        },
-        legend: { display: true },
-        title: {
-          display: true,
-          text: '".t(12)."'
-        },
-        elements: {
-          point:{
-            radius: 0
+      tooltip: {
+          trigger: 'axis',
+          formatter: function (params) {
+              var date = new Date(params[0].value[0]);
+              var tooltipString = date.getDate() + '.' + (date.getMonth() + 1) + '. :' 
+              params.forEach(function (item, index) {
+                  tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value[1]}</span>`
+              });
+              return tooltipString;
+          },
+          axisPointer: {
+              animation: false
           }
-        },
-        spanGaps: false
-      }
-    });
-  </script>\n";
+      },
+      grid: {
+          top: '35px',
+          left: '5px',
+          right: '5px',
+          bottom: '5px',
+          containLabel: true
+      },
+      xAxis: {
+          type: 'time',
+          splitArea: {
+              show: true
+          }
+      },
+      yAxis: {
+          type: 'value'
+      },
+      series: [".$day_chart."]
+  };
+  myChart.setOption(option);
+</script>\n";
     // output selection of table or only chart
     if ($script_onlychart) {
-        print("  <div id=\"div_days\" style=\"width: 650px; height: 320px\">
-    <canvas id=\"chart_days\"></canvas>
-    </div>\n".$day_html_script);
+      print("  <div id=\"div_days\" style=\"width: 650px; height: 320px\"></div>\n".$day_html_script);
     } else {
         $tr1 = strpos($day_html_table, "</tr>");
         $tr2 = strpos($day_html_table, "</tr>", $tr1 + 5);
         $chart_row = "  <td rowspan=\"100000\" style=\"vertical-align: top\">
-        <div id=\"div_days\" style=\"width: 650px; height: 320px\">
-          <canvas id=\"chart_days\"></canvas>
-        </div>
+        <div id=\"div_days\" style=\"width: 650px; height: 320px\"></div>
       </td>\n    ";
         $day_html_table = substr_replace($day_html_table, $chart_row, $tr2, 0);
         print($day_html_table.$day_html_script."  <br>\n");

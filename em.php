@@ -131,7 +131,7 @@ print("<!DOCTYPE html>
   </style>
 </head>
 <body>
-  <script src=\"charts.js\"></script>\n");
+  <script src=\"echarts.js\"></script>\n");
 
 // query first entry in database_em
 $result_em = $database_em->query('SELECT first(consumption) FROM electric_meter tz(\'Europe/Berlin\')');
@@ -218,69 +218,109 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
       <th style=\"width: 6%\">".t(12)." (".t(9).")</th>\n";
         $chart_solar_sma = ",
           {
-            label: '".t(5)." kWh',
-            backgroundColor: '#ffff00',
-            fill: true,
+            name: '".t(5)." kWh',
+            type: 'bar',
+            barGap: 0,
+            emphasis: {
+                focus: 'series'
+            },
+            itemStyle: {
+              color: '#ffff00'
+            },
             data: ".json_encode(array_values($year_solar_sma))."
           }\n";
         $chart_consumption_sma = ",
           {
-            label: '".t(4)." kWh',
-            backgroundColor: '#ffaa00',
-            fill: true,
-            data: ".json_encode(array_values($year_consumption_sma))."
+              name: '".t(4)." kWh',
+              type: 'bar',
+              barGap: 0,
+              emphasis: {
+                  focus: 'series'
+              },
+              itemStyle: {
+                  color: '#ffaa00'
+              },
+              data: ".json_encode(array_values($year_consumption_sma))."
           },
           {
-            label: '".t(13)." kWh',
-            backgroundColor: '#ffcc00',
-            fill: true,
-            data: ".json_encode(array_values($year_own_consumption))."
+              name: '".t(13)." kWh',
+              type: 'bar',
+              barGap: 0,
+              emphasis: {
+                  focus: 'series'
+              },
+              itemStyle: {
+                  color: '#ffcc00'
+              },
+              data: ".json_encode(array_values($year_own_consumption))."
           }";
     }
     $year_html_table = $year_html_table."      <th style=\"width: 40%\">".t(7)."</th>
     </tr>\n".$year_table."  </table>\n";
-    $year_html_script = "  <script>
-    new Chart(document.getElementById('chart_years'), {
-      type: 'bar',
-      data: {
-        labels: ".json_encode(array_values($year_array)).",
-        datasets: [
+    $year_html_script = "  <script type=\"text/javascript\">
+    var myChart = echarts.init(document.getElementById('chart_years'));
+    var option = {
+        title: {
+            text: '".t(6)."',
+            textStyle: {
+                fontSize: 14
+            },
+            left: 'center'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        grid: {
+            top: '35px',
+            left: '5px',
+            right: '5px',
+            bottom: '5px',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            data: ".json_encode(array_values($year_array))."
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
           {
-            label: '".t(2)." kWh',
-            backgroundColor: '#ff2200',
-            fill: true,
+            name: '".t(2)." kWh',
+            type: 'bar',
+            barGap: 0,
+            emphasis: {
+                focus: 'series'
+            },
+            itemStyle: {
+              color: '#ff2200'
+            },
             data: ".json_encode(array_values($year_grid_em))."
           }".$chart_consumption_sma.",
           {
-            label: '".t(3)." kWh',
-            backgroundColor: '#22ff00',
-            fill: true,
+            name: '".t(3)." kWh',
+            type: 'bar',
+            barGap: 0,
+            emphasis: {
+                focus: 'series'
+            },
+            itemStyle: {
+              color: '#22ff00'
+            },
             data: ".json_encode(array_values($year_supply_em))."
           }".$chart_solar_sma."
         ]
-      },
-      options: {
-        scales: { yAxes: [ { ticks: { beginAtZero: true } } ] },
-        legend: { display: false },
-        title: {
-          display: true,
-          text: '".t(6)."'
-        }
-      }
-    });
+    };
+    myChart.setOption(option);
   </script>\n";
     // output selection of table or only chart
     if ($script_onlychart) {
-        print("  <div id=\"div_years\" style=\"width: 100%\">
-    <canvas id=\"chart_years\"></canvas>
-  </div>\n".$year_html_script);
+        print("  <div id=\"chart_years\" style=\"width: 650px; height: 320px\"></div>\n".$year_html_script);
     } else {
         $tr1 = strpos($year_html_table, "</tr>");
         $tr2 = strpos($year_html_table, "</tr>", $tr1 + 5);
         $chart_row = "  <td rowspan=\"100\" style=\"vertical-align: top\">
-        <div id=\"div_years\" style=\"width: 100%; height: 320px\">
-          <canvas id=\"chart_years\"></canvas>
-        </div>
+        <div id=\"chart_years\" style=\"width: 650px; height: 320px\"></div>
       </td>\n    ";
         $year_html_table = substr_replace($year_html_table, $chart_row, $tr2, 0);
         print($year_html_table.$year_html_script."  <br>\n");
