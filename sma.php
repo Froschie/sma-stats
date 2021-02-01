@@ -803,8 +803,12 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'hour') !== 
             for ($hour = 0; $hour <= 23; $hour++) {
                 $hour_no_value = 0;
                 $hour_value = 0;
-                if ($hour_array[$month][$hour]['no_values'] > 0 && $hour_array[$month][$hour]['value'] > 0) {
-                    $hour_value = round($hour_array[$month][$hour]['value']/$hour_array[$month][$hour]['no_values'], 0);
+                if (isset($hour_array[$month][$hour])) {
+                    if ($hour_array[$month][$hour]['no_values'] > 0 && $hour_array[$month][$hour]['value'] > 0) {
+                        $hour_value = round($hour_array[$month][$hour]['value']/$hour_array[$month][$hour]['no_values'], 0);
+                    }
+                } else {
+                    $hour_value = 0;
                 }
                 $hour_html_table = $hour_html_table."            <td>".$hour_value."</td>\n";
               }
