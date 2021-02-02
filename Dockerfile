@@ -2,7 +2,7 @@
 FROM php:apache
 
 # Image Description
-LABEL version="1.3" description="Script to visualize statistics about SMA Inverter and other meters." 
+LABEL version="1.4" description="Script to visualize statistics about SMA Inverter and other meters." 
 
 # Unzip is requirement to install composer
 RUN apt-get update && apt-get install -y unzip

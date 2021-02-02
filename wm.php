@@ -24,8 +24,8 @@ $client_wm = new InfluxDB\Client($influx_wm_ip, $influx_wm_port, $influx_wm_user
 $database_wm = $client_wm->selectDB($influx_wm_db);
 
 // language definition and value check
-$dict['de'] = array(1 => 'Jahr', 2 => 'Wasser', 3 => 'Wasserverbrauch pro Jahr', 4 => 'Grafik', 5 => 'Generierungzeit Jahres Tabelle', 6 => 'Generierungzeit Monats Tabelle', 7 => 'Generierungzeit Tages Tabelle', 8 => 'Gesamt Generierungzeit', 9 => 'Monat', 10 => 'Wasserverbrauch je Monat', 11 => 'Tag', 12 => 'Wasserverbrauch je Tag');
-$dict['en'] = array(1 => 'Year', 2 => 'Water', 3 => 'Water usage per Year', 4 => 'Chart', 5 => 'Year Table Generation Time', 6 => 'Month Table Generation Time', 7 => 'Day Table Generation Time', 8 => 'Total Generation Time', 9 => 'Month', 10 => 'Water usage per Month', 11 => 'Day', 12 => 'Water usage per Day');
+$dict['de'] = array(1 => 'Jahr', 2 => 'Wasser', 3 => 'Wasserverbrauch pro Jahr', 4 => 'Grafik', 5 => 'Generierungzeit Jahres Tabelle', 6 => 'Generierungzeit Monats Tabelle', 7 => 'Generierungzeit Tages Tabelle', 8 => 'Gesamt Generierungzeit', 9 => 'Monat', 10 => 'Wasserverbrauch je Monat', 11 => 'Tag', 12 => 'Wasserverbrauch je Tag', 13 => '\'Jan\', \'Feb\', \'Mär\', \'Apr\', \'Mai\', \'Jun\', \'Jul\', \'Aug\', \'Sep\', \'Okt\', \'Nov\', \'Dez\'');
+$dict['en'] = array(1 => 'Year', 2 => 'Water', 3 => 'Water usage per Year', 4 => 'Chart', 5 => 'Year Table Generation Time', 6 => 'Month Table Generation Time', 7 => 'Day Table Generation Time', 8 => 'Total Generation Time', 9 => 'Month', 10 => 'Water usage per Month', 11 => 'Day', 12 => 'Water usage per Day',  13 => '\'Jan\', \'Feb\', \'Mar\', \'Apr\', \'May\', \'Jun\', \'Jul\', \'Aug\', \'Sep\', \'Oct\', \'Nov\', \'Dec\'');
 switch(getenv('wmlang')) {
     case "en":
         $script_lang = "en";
@@ -310,8 +310,20 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
           left: 'center'
       },
       tooltip: {
-          trigger: 'axis'
-      },
+        trigger: 'axis',
+        formatter: function (params) {
+            var tooltipString = params[0].axisValue
+            params.forEach(function (item, index) {
+                if (item.value > 0) {
+                    tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value}</span>`
+                }
+            });
+            return tooltipString;
+        },
+        axisPointer: {
+            animation: false
+        }
+    },
       grid: {
           top: '35px',
           left: '5px',
@@ -321,7 +333,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
       },
       xAxis: {
           type: 'category',
-          data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+          data: [".t(13)."]
       },
       yAxis: {
           type: 'value'
@@ -429,7 +441,9 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
               var date = new Date(params[0].value[0]);
               var tooltipString = date.getDate() + '.' + (date.getMonth() + 1) + '. :' 
               params.forEach(function (item, index) {
-                  tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value[1]}</span>`
+                if (item.value[1] > 0) {
+                    tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value[1]}</span>`
+                }
               });
               return tooltipString;
           },

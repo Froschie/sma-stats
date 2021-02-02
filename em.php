@@ -268,7 +268,17 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             left: 'center'
         },
         tooltip: {
-            trigger: 'axis'
+            trigger: 'axis',
+            formatter: function (params) {
+                var tooltipString = params[0].axisValue
+                params.forEach(function (item, index) {
+                    tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value}</span>`
+                });
+                return tooltipString;
+            },
+            axisPointer: {
+                animation: false
+            }
         },
         grid: {
             top: '35px',
