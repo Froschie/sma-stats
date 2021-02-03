@@ -388,7 +388,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             data: ".json_encode(array_values($year_solar)).",
             type: 'bar',
             itemStyle: {
-                    color: '".c($year)."'
+                    color: '".$color_default."'
             }
         }]
     };
@@ -615,7 +615,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
             $start_time = mktime(0, 0, 0, 1, 1, $year);
             $end_time = mktime(0, 0, 0, 1, 1, $year+1);
             // InfluxDB query for whole year incl. Timezone setting!
-            $result = $database->query('SELECT solar_daily AS solar, bezug_daily AS grid, consumption_daily AS consumption, einspeisung_daily AS supply FROM totals_daily WHERE time>='.$start_time.'s and time<'.$end_time.'s tz(\'Europe/Berlin\')');
+            $result = $database->query('SELECT solar_daily AS solar, bezug_daily AS grid, consumption_daily AS consumption, einspeisung_daily AS supply, solar_max AS solar_max FROM totals_daily WHERE time>='.$start_time.'s and time<'.$end_time.'s tz(\'Europe/Berlin\')');
             $points = $result->getPoints();
             $day_of_year = 0;
             $day_count = 0;
@@ -630,12 +630,17 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                 $grid = round($day['grid']/1000, 1);
                 $consumption = round($day['consumption']/1000, 1);
                 $supply = round($day['supply']/1000, 1);
+                $day_solar_max = $day['solar_max'];
                 $own_consumption = $solar-$supply;
                 $day_solar_max_html = "";
                 $day_solar_max_header = "";
                 if ($solar > 0) {
+                    if ($script_max_solar) {
+                        $day_solar_max_html = "\n      <td>".round($day_solar_max, 0).$unit_w."</td>";
+                        $day_solar_max_header = "\n      <th style=\"width: 90px\">".t(19)."</th>";
+                    }
                     // check for maximul solar generation during 5min in day
-                    if ($script_max_solar or $script_base_line or $script_time_solar > 0 or $script_nogrid_time or $script_car_charging > 0 or $script_over_supply > 0) {
+                    if ($script_base_line or $script_time_solar > 0 or $script_nogrid_time or $script_car_charging > 0 or $script_over_supply > 0) {
                         // InfluxDB query
                         $start_time = strtotime($day['time']);
                         $end_time = strtotime("+1 day", $start_time);
@@ -645,14 +650,10 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                         $day_car_charging_time = 0;
                         $day_car_charging_kwh = 0;
                         $day_over_supply = 0;
-                        $day_solar_max = 0;
                         $day_first_solar_time = "";
                         $day_last_solar_time = "";
                         $day_base_line = 100000;
                         foreach ($points as $value) {
-                            if ($value['solar'] > $day_solar_max) {
-                                $day_solar_max = $value['solar'];
-                            }
                             if ($value['consumption'] < $day_base_line && $value['consumption'] > 0 && $value['consumption'] != "") {
                                 $day_base_line = round($value['consumption'], 0);
                             }
@@ -672,10 +673,6 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                             if ($value['supply'] > $script_over_supply) {
                                 $day_over_supply = $day_over_supply + (($value['supply']-$script_over_supply)/12/1000);
                           }
-                        }
-                        if ($script_max_solar) {
-                            $day_solar_max_html = "\n      <td>".round($day_solar_max, 0).$unit_w."</td>";
-                            $day_solar_max_header = "\n      <th style=\"width: 90px\">".t(19)."</th>";
                         }
                         if ($script_time_solar > 0) {
                             if ($day_first_solar_time != "") {

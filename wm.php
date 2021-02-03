@@ -238,7 +238,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
           data: ".json_encode(array_values($year_water)).",
           type: 'bar',
           itemStyle: {
-                  color: '".c($year)."'
+                  color: '".$color_default."'
           }
       }]
   };
