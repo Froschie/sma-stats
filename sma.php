@@ -50,14 +50,33 @@ function t($id) {
 }
 
 // function for chart colors
+$color_default = "#ffff00";
+$color_array = array();
+if (getenv('color') != "") {
+    $colors = explode(";", getenv('color'));
+    foreach ($colors as $values) {
+        $value = explode(",", $values);
+        if (count($value) == 2) {
+            $color_array[$value[0]] = $value[1];
+        }
+    }
+}
+if (isset($_GET['color'])) {
+    $colors = explode(";", $_GET['color']);
+    foreach ($colors as $values) {
+        $value = explode(",", $values);
+        if (count($value) == 2) {
+            $color_array[$value[0]] = $value[1];
+        }
+    }
+}
 function c($year) {
-    switch($year) {
-        case "2020":
-            return "#ffff00";
-        case "2021":
-            return "#00ff00";
-        default:
-            return "#ffff00";
+    global $color_default;
+    global $color_array;
+    if (array_key_exists($year, $color_array)) {
+        return "#".$color_array[$year];
+    } else {
+        return $color_default;
     }
 }
 
@@ -346,7 +365,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             textStyle: {
                 fontSize: 14
             },
-            left: 'center'
+            left: 'left'
         },
         tooltip: {
             trigger: 'axis'
@@ -402,12 +421,14 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
         $month_time_start = hrtime(true);
         // variable initialization
         $year = $year_first;
+        $year_array = array();
         $month_chart = "";
         $month_table = "";
         // loop for first to actual year
         while ($year <= $year_act) {
             // variable initialization
             $month_solar = array();
+            $year_array[] = strval($year);
             // define start and end time of the loop year
             $month = mktime(0, 0, 0, 1, 1, $year);
             $end = mktime(0, 0, 0, 1, 1, $year+1);
@@ -486,7 +507,8 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                 markLine: {
                     data: [
                         {type: 'average'}
-                    ]
+                    ],
+                    precision: 0
                 }
             }";
             $year = $year + 1;
@@ -514,7 +536,11 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
             textStyle: {
                 fontSize: 14
             },
-            left: 'center'
+            left: 'left'
+        },
+        legend: {
+            data: ".json_encode(array_values($year_array)).",
+            left: 'right'
         },
         tooltip: {
             trigger: 'axis',
@@ -534,7 +560,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
         grid: {
             top: '40px',
             left: '5px',
-            right: '5px',
+            right: '30px',
             bottom: '5px',
             containLabel: true
         },
@@ -576,6 +602,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
         $day_time_start = hrtime(true);
         // variable initialization
         $year = $year_first;
+        $year_array = array();
         $day_chart = "";
         $day_table = "";
         $day_actual = new DateTime();
@@ -583,6 +610,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
         while ($year <= $year_act) {
             // variable initialization
             $day_solar = array();
+            $year_array[] = strval($year);
             // define start and end time of the loop year
             $start_time = mktime(0, 0, 0, 1, 1, $year);
             $end_time = mktime(0, 0, 0, 1, 1, $year+1);
@@ -734,7 +762,8 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                 markLine: {
                     data: [
                         {type: 'average'}
-                    ]
+                    ],
+                    precision: 1
                 }
             }";
             $year = $year + 1;
@@ -762,7 +791,11 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
             textStyle: {
                 fontSize: 14
             },
-            left: 'center'
+            left: 'left'
+        },
+        legend: {
+            data: ".json_encode(array_values($year_array)).",
+            left: 'right'
         },
         tooltip: {
             trigger: 'axis',
@@ -781,7 +814,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
         grid: {
             top: '40px',
             left: '5px',
-            right: '5px',
+            right: '32px',
             bottom: '5px',
             containLabel: true
         },
