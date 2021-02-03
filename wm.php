@@ -50,6 +50,18 @@ function t($id) {
     return $dict[$script_lang][$id];
 }
 
+// function for chart colors
+function c($year) {
+    switch($year) {
+        case "2020":
+            return "#0000ff";
+        case "2021":
+            return "#000055";
+        default:
+            return "#0000ff";
+    }
+}
+
 // function to replace "." with "," for german output
 function d($value) {
   global $script_lang;
@@ -207,7 +219,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
           data: ".json_encode(array_values($year_water)).",
           type: 'bar',
           itemStyle: {
-                  color: '#0000ff'
+                  color: '".c($year)."'
           }
       }]
   };
@@ -279,16 +291,27 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
             }
             $month_chart = $month_chart."
             {
-              name: '".$year."',
-              data: ".json_encode(array_values($month_water)).",
-              type: 'line',
-              smooth: true,
-              itemStyle: {
-                  color: '#0000".dechex(255-($year-$year_first)*7)."'
-              },
-              emphasis: {
-                  focus: 'series'
-              }
+                name: '".$year."',
+                data: ".json_encode(array_values($month_water)).",
+                type: 'line',
+                smooth: true,
+                itemStyle: {
+                    color: '".c($year)."'
+                },
+                emphasis: {
+                    focus: 'series'
+                },
+                markPoint: {
+                    data: [
+                        {type: 'max'},
+                        {type: 'min'}
+                    ]
+                },
+                markLine: {
+                    data: [
+                        {type: 'average'}
+                    ]
+                }
             }";
             $year = $year + 1;
         }
@@ -405,17 +428,28 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
             }
             $day_chart = $day_chart."
             {
-              name: '".$year."',
-              data: ".json_encode(array_values($day_water)).",
-              type: 'line',
-              smooth: true,
-                  itemStyle: {
-                      color: '#0000".dechex(255-($year-$year_first)*7)."'
-                  },
-                  emphasis: {
-                      focus: 'series'
-                  }
-          }";
+                name: '".$year."',
+                data: ".json_encode(array_values($day_water)).",
+                type: 'line',
+                smooth: true,
+                itemStyle: {
+                    color: '".c($year)."'
+                },
+                emphasis: {
+                        focus: 'series'
+                },
+                markPoint: {
+                    data: [
+                        {type: 'max'},
+                        {type: 'min'}
+                    ]
+                },
+                markLine: {
+                    data: [
+                        {type: 'average'}
+                    ]
+                }
+            }";
             $year = $year + 1;
         }
     // after looping through all years, generate the table

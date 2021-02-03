@@ -49,6 +49,18 @@ function t($id) {
     return $dict[$script_lang][$id];
 }
 
+// function for chart colors
+function c($year) {
+    switch($year) {
+        case "2020":
+            return "#ffff00";
+        case "2021":
+            return "#00ff00";
+        default:
+            return "#ffff00";
+    }
+}
+
 // function to replace "." with "," for german output
 function d($value) {
   global $script_lang;
@@ -357,7 +369,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             data: ".json_encode(array_values($year_solar)).",
             type: 'bar',
             itemStyle: {
-                    color: '#ffff00'
+                    color: '".c($year)."'
             }
         }]
     };
@@ -455,17 +467,28 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
             }
             $month_chart = $month_chart."
           {
-            name: '".$year."',
-            data: ".json_encode(array_values($month_solar)).",
-            type: 'line',
-            smooth: true,
-            itemStyle: {
-                color: '#".dechex(255-($year-$year_first)*7).dechex(255-($year-$year_first)*10)."00'
-            },
-            emphasis: {
-                focus: 'series'
-            }
-          }";
+                name: '".$year."',
+                data: ".json_encode(array_values($month_solar)).",
+                type: 'line',
+                smooth: true,
+                itemStyle: {
+                    color: '".c($year)."'
+                },
+                emphasis: {
+                    focus: 'series'
+                },
+                markPoint: {
+                    data: [
+                        {type: 'max'},
+                        {type: 'min'}
+                    ]
+                },
+                markLine: {
+                    data: [
+                        {type: 'average'}
+                    ]
+                }
+            }";
             $year = $year + 1;
         }
     // after looping through all years, generate the table
@@ -509,7 +532,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
             }
         },
         grid: {
-            top: '35px',
+            top: '40px',
             left: '5px',
             right: '5px',
             bottom: '5px',
@@ -691,18 +714,29 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                 $day_chart = $day_chart.",";
             }
             $day_chart = $day_chart."
-          {
-            name: '".$year."',
-            data: ".json_encode(array_values($day_solar)).",
-            type: 'line',
-            smooth: true,
+            {
+                name: '".$year."',
+                data: ".json_encode(array_values($day_solar)).",
+                type: 'line',
+                smooth: true,
                 itemStyle: {
-                    color: '#".dechex(255-($year-$year_first)*7).dechex(255-($year-$year_first)*10)."00'
+                    color: '".c($year)."'
                 },
                 emphasis: {
                     focus: 'series'
+                },
+                markPoint: {
+                    data: [
+                        {type: 'max'},
+                        {type: 'min'}
+                    ]
+                },
+                markLine: {
+                    data: [
+                        {type: 'average'}
+                    ]
                 }
-          }";
+            }";
             $year = $year + 1;
         }
     // after looping through all years, generate the table
@@ -745,7 +779,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
             }
         },
         grid: {
-            top: '35px',
+            top: '40px',
             left: '5px',
             right: '5px',
             bottom: '5px',
