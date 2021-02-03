@@ -848,6 +848,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'hour') !== 
           <th style=\"width: 40px\">22</th>
           <th style=\"width: 40px\">23</th>
         <tr>\n";
+        ksort($hour_array);
         foreach (array_keys($hour_array) as $month) {
             $hour_html_table = $hour_html_table."    <tr>
           <td>".$month."</td>\n";
