@@ -22,6 +22,9 @@ require __DIR__ . '/vendor/autoload.php';
 $client = new InfluxDB\Client($influx_sma_ip, $influx_sma_port, $influx_sma_user, $influx_sma_pw);
 $database = $client->selectDB($influx_sma_db);
 
+// load function file
+require __DIR__ . '/script_functions.php';
+
 // language definition and value check
 $dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 13 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit', 18 => 'Tag', 19 => 'Max. 5min Solar', 20 => 'Erste Zeit >', 21 => 'Letzte Zeit >', 22 => 'Minimalster Strom Verbrauch', 23 => 'Zeit ohne Netzbezg', 24 => 'Ladeleistung Auto >', 25 => 'Einspeisung über ', 26 => 'Generierungzeit Stunden Tabelle', 27 => 'Monat / Stunde', 28 => '\'Jan\', \'Feb\', \'Mär\', \'Apr\', \'Mai\', \'Jun\', \'Jul\', \'Aug\', \'Sep\', \'Okt\', \'Nov\', \'Dez\'');
 $dict['en'] = array(1 => 'Year', 2 => 'Solar', 3 => 'Grid', 4 => 'Consumption', 5 => 'Supply', 6 => 'Own Consumption', 7 => 'Self Consumption', 8 => 'Self Sufficiency', 9 => 'Chart', 10 => "Month", 11 => 'Solar Energy Generation per Year', 12 => 'Solar Energy per Months', 13 => 'Solar Energy per Day of the Year', 14 => 'Year Table Generation Time', 15 => 'Month Table Generation Time', 16 => 'Day Table Generation Time', 17 => 'Total Generation Time', 18 => 'Day', 19 => 'Peak 5min Solar', 20 => 'First time >', 21 => 'Last time >', 22 => 'Minium Power Consumption', 23 => 'Time without grid power', 24 => 'Car charging power >', 25 => 'Grid supply over ', 26 => 'Hour Table Generation Time', 27 => 'Month / Hour', 28 => '\'Jan\', \'Feb\', \'Mar\', \'Apr\', \'May\', \'Jun\', \'Jul\', \'Aug\', \'Sep\', \'Oct\', \'Nov\', \'Dec\'');
@@ -395,19 +398,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
     myChart.setOption(option);
 </script>\n";
     // output selection of table or only chart
-    if ($script_onlychart) {
-        print("  <div id=\"div_years\" style=\"width: 650px; height: 320px\"></div>\n".$year_html_script);
-    } elseif ($script_onlytable) {
-        print($year_html_table.$year_html_script."  <br>\n");
-    } else {
-        $tr1 = strpos($year_html_table, "</tr>");
-        $tr2 = strpos($year_html_table, "</tr>", $tr1 + 5);
-        $chart_row = "  <td rowspan=\"100\" style=\"vertical-align: top\">
-        <div id=\"div_years\" style=\"width: 650px; height: 320px\"></div>
-      </td>\n    ";
-        $year_html_table = substr_replace($year_html_table, $chart_row, $tr2, 0);
-        print($year_html_table.$year_html_script."  <br>\n");
-    }
+    output($script_onlychart, $script_onlytable, "div_years", $year_html_script, $year_html_table);
     // end debug timing for year chart
     $year_time_end = hrtime(true);
     }
@@ -576,19 +567,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
     myChart.setOption(option);
 </script>\n";
     // output selection of table or only chart
-    if ($script_onlychart) {
-        print("  <div id=\"div_months\" style=\"width: 650px; height: 320px\"></div>\n".$month_html_script);
-    } elseif ($script_onlytable) {
-        print($month_html_table.$month_html_script."  <br>\n");
-    } else {
-        $tr1 = strpos($month_html_table, "</tr>");
-        $tr2 = strpos($month_html_table, "</tr>", $tr1 + 5);
-        $chart_row = "  <td rowspan=\"1000\" style=\"vertical-align: top\">
-        <div id=\"div_months\" style=\"width: 650px; height: 320px\"></div>
-      </td>\n    ";
-        $month_html_table = substr_replace($month_html_table, $chart_row, $tr2, 0);
-        print($month_html_table.$month_html_script."  <br>\n");
-    }
+    output($script_onlychart, $script_onlytable, "div_months", $month_html_script, $month_html_table);
     // end debug timing for month chart
     $month_time_end = hrtime(true);
     }
@@ -820,19 +799,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
     myChart.setOption(option);
 </script>\n";
     // output selection of table or only chart
-    if ($script_onlychart) {
-        print("  <div id=\"div_days\" style=\"width: 650px; height: 320px\"></div>\n".$day_html_script);
-    } elseif ($script_onlytable) {
-        print($day_html_table.$day_html_script."  <br>\n");
-    } else {
-        $tr1 = strpos($day_html_table, "</tr>");
-        $tr2 = strpos($day_html_table, "</tr>", $tr1 + 5);
-        $chart_row = "  <td rowspan=\"100000\" style=\"vertical-align: top\">
-        <div id=\"div_days\" style=\"width: 650px; height: 320px\"></div>
-      </td>\n    ";
-        $day_html_table = substr_replace($day_html_table, $chart_row, $tr2, 0);
-        print($day_html_table.$day_html_script."  <br>\n");
-    }
+    output($script_onlychart, $script_onlytable, "div_days", $day_html_script, $day_html_table);
     // end debug timing for day chart
     $day_time_end = hrtime(true);
     }
@@ -923,7 +890,8 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'hour') !== 
         }
         $hour_html_table = $hour_html_table."        </tr>
       </table>\n";
-        print($hour_html_table."  <br>\n");
+        // output selection of table or only chart
+        output($script_onlychart, $script_onlytable, "", "", $hour_html_table);
     }
     // end debug timing for day chart
     $hour_time_end = hrtime(true);
