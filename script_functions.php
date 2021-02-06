@@ -24,4 +24,37 @@ function output($script_onlychart, $script_onlytable, $div, $html_script, $html_
     }
 }
 
+// query first entry in database
+$year_first_var = 0;
+if (getenv('startyear') == "actual") {
+    $year_first_var = date("Y");
+} elseif (getenv('startyear') > 0) {
+    $year_first_var = getenv('startyear');
+}
+if (isset($_GET['startyear'])) {
+    if ($_GET['startyear'] == "actual") {
+        $year_first_var = date("Y");
+    } elseif ($_GET['startyear'] > 0) {
+        $year_first_var = $_GET['startyear'];
+    }
+}
+$year_first = $year_first_var;
+$result = $database->query('SELECT first(solar_total) FROM totals tz(\'Europe/Berlin\')');
+$points = $result->getPoints();
+if (isset($points[0])) {
+    $f_year = explode("-", $points[0]['time'])[0];
+    if ($f_year > $year_first_var) {
+        $year_first = $f_year;
+    }
+    $month_first = explode("-", $points[0]['time'])[1];
+}
+$result = $database->query('SELECT last(solar_total) FROM totals tz(\'Europe/Berlin\')');
+$points = $result->getPoints();
+if (isset($points[0])) {
+    $l_year = explode("-", $points[0]['time'])[0];
+    if ($l_year < $year_first_var) {
+        $year_first = $f_year;
+    }
+}
+
 ?>

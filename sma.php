@@ -275,14 +275,6 @@ print("<!DOCTYPE html>
 <body>
   <script src=\"echarts.js\"></script>\n");
 
-// query first entry in database
-$result = $database->query('SELECT first(solar_total) FROM totals tz(\'Europe/Berlin\')');
-$points = $result->getPoints();
-if (isset($points[0])) {
-    $year_first = explode("-", $points[0]['time'])[0];
-    $month_first = explode("-", $points[0]['time'])[1];
-}
-
 // year chart
 if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== false) {
     // only continue if really data is available in database
