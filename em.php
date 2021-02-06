@@ -28,7 +28,7 @@ $influx_sma_pw = getenv('smadb_pw');
 require __DIR__ . '/vendor/autoload.php';
 // connect to Electric Meter InfluxDB
 $client_em = new InfluxDB\Client($influx_em_ip, $influx_em_port, $influx_em_user, $influx_em_pw);
-$database_em = $client_em->selectDB($influx_em_db);
+$database = $client_em->selectDB($influx_em_db);
 // connect to SMA InfluxDB
 if ($influx_sma_ip == "192.168.1.3" && $influx_sma_db == "SMA" && $influx_sma_port == "8086" && $influx_sma_user == "user" && $influx_sma_pw == "pw") {
     $sma_query = FALSE;
@@ -37,6 +37,9 @@ if ($influx_sma_ip == "192.168.1.3" && $influx_sma_db == "SMA" && $influx_sma_po
     $database_sma = $client_sma->selectDB($influx_sma_db);
     $sma_query = TRUE;    
 }
+
+// load function file
+require __DIR__ . '/script_functions.php';
 
 // language definition and value check
 $dict['de'] = array(1 => 'Jahr', 2 => 'Netzbezug', 3 => 'Einspeisung', 4 => 'Verbrauch', 5 => 'Solar', 6 => 'Werte pro Jahr', 7 => 'Grafik', 8 => 'EM', 9 => 'SMA', 10 => 'Eigen- verbrauch', 11 => 'Eigen- verbrauchsquote', 12 => 'Autarkie- grad', 13 => 'Eigenverbrauch', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Gesamt Generierungzeit', 17 => 'Monat', 18 => 'Zähler Stand');
@@ -112,10 +115,6 @@ if (isset($_GET['onlychart'])) {
     $script_onlychart = FALSE;
 }
 
-// actual dates
-$year_act = date("Y");
-$month_act = date("m");
-
 // html header
 print("<!DOCTYPE html>
 <html>
@@ -133,17 +132,15 @@ print("<!DOCTYPE html>
 <body>
   <script src=\"echarts.js\"></script>\n");
 
-// query first entry in database_em
-$result_em = $database_em->query('SELECT first(consumption) FROM electric_meter tz(\'Europe/Berlin\')');
-$points_em = $result_em->getPoints();
-if (isset($points_em[0])) {
-    $year_first = explode("-", $points_em[0]['time'])[0];
-    $month_first = explode("-", $points_em[0]['time'])[1];
-}
+// set first and last year for query
+$f_year = inf_query_year('SELECT first(consumption) FROM electric_meter tz(\'Europe/Berlin\')');
+$l_year = inf_query_year('SELECT last(consumption) FROM electric_meter tz(\'Europe/Berlin\')');
+$year_first = year_first($f_year, $l_year);
+$year_act = year_act($year_act, $f_year, $l_year);
 
 // year chart
 if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== false) {
-    // only continue if really data is available in database_em
+    // only continue if really data is available in database
     if (isset($year_first)) {
         // start debug timing for year chart
         $year_time_start = hrtime(true);
@@ -163,7 +160,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             $start_time = mktime(0, 0, 0, 1, 1, $year);
             $end_time = mktime(0, 0, 0, 1, 1, $year+1);
             // Electric Meter InfluxDB query
-            $result_em = $database_em->query('SELECT spread(consumption) AS grid, spread(supply) AS supply FROM electric_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
+            $result_em = $database->query('SELECT spread(consumption) AS grid, spread(supply) AS supply FROM electric_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
             $points_em = $result_em->getPoints();
             // extract queried values
             $grid_em = round($points_em[0]['grid']/1000, 0);
@@ -342,7 +339,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
 
 // month chart
 if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !== false) {
-    // only continue if really data is available in database_em
+    // only continue if really data is available in database
     if (isset($year_first)) {
         // start debug timing for month chart
         $month_time_start = hrtime(true);
@@ -359,7 +356,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
             $start_time = mktime(0, 0, 0, date("m", $month), 1, date("Y", $month));
             $end_time = mktime(0, 0, 0, date("m", $month)+1, 1, date("Y", $month));
             // Electric Meter InfluxDB query
-            $result_em = $database_em->query('SELECT spread(consumption) AS grid, spread(supply) AS supply, last(consumption) as last_grid, last(supply) as last_supply FROM electric_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
+            $result_em = $database->query('SELECT spread(consumption) AS grid, spread(supply) AS supply, last(consumption) as last_grid, last(supply) as last_supply FROM electric_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
             $points_em = $result_em->getPoints();
             // extract queried values
             if (isset($points_em[0])) {
@@ -370,7 +367,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                 $supply_em = 0;
             }
             // Electric Meter InfluxDB query
-            $result_em = $database_em->query('SELECT last(consumption) as last_grid FROM electric_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
+            $result_em = $database->query('SELECT last(consumption) as last_grid FROM electric_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
             $points_em = $result_em->getPoints();
             if (isset($points_em[0])) {
                 $last_grid_em = round($points_em[0]['last_grid']/1000, 1);
@@ -380,7 +377,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                 $last_grid_em_time = 0;
             }
             // Electric Meter InfluxDB query
-            $result_em = $database_em->query('SELECT last(supply) as last_supply FROM electric_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
+            $result_em = $database->query('SELECT last(supply) as last_supply FROM electric_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
             $points_em = $result_em->getPoints();
             if (isset($points_em[0])) {
                 $last_supply_em = round($points_em[0]['last_supply']/1000, 1);

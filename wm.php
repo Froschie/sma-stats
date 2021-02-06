@@ -21,7 +21,10 @@ if ($influx_wm_ip == "192.168.1.3" && $influx_wm_db == "measurements" && $influx
 require __DIR__ . '/vendor/autoload.php';
 // connect to Electric Meter InfluxDB
 $client_wm = new InfluxDB\Client($influx_wm_ip, $influx_wm_port, $influx_wm_user, $influx_wm_pw);
-$database_wm = $client_wm->selectDB($influx_wm_db);
+$database = $client_wm->selectDB($influx_wm_db);
+
+// load function file
+require __DIR__ . '/script_functions.php';
 
 // language definition and value check
 $dict['de'] = array(1 => 'Jahr', 2 => 'Wasser', 3 => 'Wasserverbrauch pro Jahr', 4 => 'Grafik', 5 => 'Generierungzeit Jahres Tabelle', 6 => 'Generierungzeit Monats Tabelle', 7 => 'Generierungzeit Tages Tabelle', 8 => 'Gesamt Generierungzeit', 9 => 'Monat', 10 => 'Wasserverbrauch je Monat', 11 => 'Tag', 12 => 'Wasserverbrauch je Tag', 13 => '\'Jan\', \'Feb\', \'Mär\', \'Apr\', \'Mai\', \'Jun\', \'Jul\', \'Aug\', \'Sep\', \'Okt\', \'Nov\', \'Dez\'');
@@ -139,10 +142,6 @@ if (isset($_GET['days'])) {
     }
 }
 
-// actual dates
-$year_act = date("Y");
-$month_act = date("m");
-
 // html header
 print("<!DOCTYPE html>
 <html>
@@ -160,17 +159,15 @@ print("<!DOCTYPE html>
 <body>
   <script src=\"echarts.js\"></script>\n");
 
-// query first entry in database_wm$database_wm
-$result_em = $database_wm->query('SELECT first(l) FROM water_meter tz(\'Europe/Berlin\')');
-$points_em = $result_em->getPoints();
-if (isset($points_em[0])) {
-    $year_first = explode("-", $points_em[0]['time'])[0];
-    $month_first = explode("-", $points_em[0]['time'])[1];
-}
+// set first and last year for query
+$f_year = inf_query_year('SELECT first(l) FROM water_meter tz(\'Europe/Berlin\')');
+$l_year = inf_query_year('SELECT last(l) FROM water_meter tz(\'Europe/Berlin\')');
+$year_first = year_first($f_year, $l_year);
+$year_act = year_act($year_act, $f_year, $l_year);
 
 // year chart
 if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== false) {
-    // only continue if really data is available in database_wm$database_wm
+    // only continue if really data is available in database
     if (isset($year_first)) {
         // start debug timing for year chart
         $year_time_start = hrtime(true);
@@ -186,7 +183,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             $start_time = mktime(0, 0, 0, 1, 1, $year);
             $end_time = mktime(0, 0, 0, 1, 1, $year+1);
             // Water Meter InfluxDB query
-            $result_wm = $database_wm->query('SELECT sum(l) AS water FROM water_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
+            $result_wm = $database->query('SELECT sum(l) AS water FROM water_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
             $points_wm = $result_wm->getPoints();
             // extract queried values
             $water = $points_wm[0]['water']/1000;
@@ -263,7 +260,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
 
 // month chart
 if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !== false) {
-    // only continue if really data is available in database_wm$database_wm
+    // only continue if really data is available in database$database
     if (isset($year_first)) {
         // start debug timing for month chart
         $month_time_start = hrtime(true);
@@ -287,7 +284,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                 $start_time = mktime(0, 0, 0, date("m", $month), 1, date("Y", $month));
                 $end_time = mktime(0, 0, 0, date("m", $month)+1, 1, date("Y", $month));
                 // Water Meter InfluxDB query
-                $result_wm = $database_wm->query('SELECT sum(l) AS water FROM water_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
+                $result_wm = $database->query('SELECT sum(l) AS water FROM water_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s tz(\'Europe/Berlin\')');
                 $points_wm = $result_wm->getPoints();
                 // extract queried values
                 if (isset($points_wm[0]['water'])) {
@@ -430,7 +427,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
             $start_time = mktime(0, 0, 0, 1, 1, $year);
             $end_time = mktime(0, 0, 0, 1, 1, $year+1);
             // Water Meter InfluxDB query
-            $result_wm = $database_wm->query('SELECT sum(l) AS water FROM water_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s GROUP BY time(1d) tz(\'Europe/Berlin\')');
+            $result_wm = $database->query('SELECT sum(l) AS water FROM water_meter WHERE time >='.$start_time.'s and time<='.$end_time.'s GROUP BY time(1d) tz(\'Europe/Berlin\')');
             $points_wm = $result_wm->getPoints();
             foreach ($points_wm as $day) {
                 // extract queried values

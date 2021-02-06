@@ -254,9 +254,11 @@ if (isset($_GET['onlytable'])) {
   }
 }
 
-// actual dates
-$year_act = date("Y");
-$month_act = date("m");
+// set first and last year for query
+$f_year = inf_query_year('SELECT first(solar_total) FROM totals tz(\'Europe/Berlin\')');
+$l_year = inf_query_year('SELECT last(solar_total) FROM totals tz(\'Europe/Berlin\')');
+$year_first = year_first($f_year, $l_year);
+$year_act = year_act($year_act, $f_year, $l_year);
 
 // html header
 print("<!DOCTYPE html>
@@ -740,6 +742,36 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
       <th style=\"width: 90px\">".t(8)."</th>".$day_solar_max_header;
     if (!$script_onlytable) {
         $day_html_table = $day_html_table."\n      <th style=\"width: 710px\">".t(9)."</th>";
+    }
+    if ($day_table == "") {
+        if ($script_max_solar) {
+            $day_solar_max_html = "\n      <td></td>";
+        }
+        if ($script_base_line) {
+            $day_solar_max_html = $day_solar_max_html."\n      <td></td>";
+        }
+        if ($script_time_solar) {
+            $day_solar_max_html = $day_solar_max_html."\n      <td></td>\n      <td></td>";
+        }
+        if ($script_nogrid_time) {
+            $day_solar_max_html = $day_solar_max_html."\n      <td></td>";
+        }
+        if ($script_car_charging > 0) {
+                $day_solar_max_html = $day_solar_max_html."\n      <td></td>";
+        }
+        if ($script_over_supply > 0) {
+            $day_solar_max_html = $day_solar_max_html."\n      <td></td>";
+        }
+        $day_table = "    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>".$day_solar_max_html."
+    </tr>\n";
     }
     $day_html_table = $day_html_table."\n    </tr>\n".$day_table."  </table>";
     $day_html_script = "\n  <script type=\"text/javascript\">

@@ -28,9 +28,12 @@ The "sma.php" script list and visualizes the [SMA Query](https://github.com/Fros
 | days | x | x | Show only defined number of days in day table (0 = all). |
 | over_supply | x | x | Shows colum for power supply to grid which is above a defined limit. |
 | nounits | x | x | Hide the units ("W" / "kWh") from the tables. To hide set to "yes". |
+| color | x | x | Define the graph colors for each year. Default: "*2021,00ff00;2022,ff0000*". Values must be in format "\<year>,\<colorcode>". Multiple years seperated by ";". |
+| startyear | x | x | Defines the first year the statistic should be generated for. Values can be "actual" or the 4-digit year number. |
+| endyear | x | x | Defines the last year the statistic should be generated for. Values can be "actual" or the 4-digit year number. |
 | timing | - | x | Debug option to show script runtimes |
 
-Example request: `http://192.168.1.1:8080/sma.php?lang=de&table_borders=no&chart=monthday&timing&max_solar&baseline&nogrid_time&car_charging=1400&over_supply=3000`
+Example request: `http://192.168.1.1:8080/sma.php?lang=de&table_borders=no&chart=monthday&timing&max_solar&baseline&nogrid_time&car_charging=1400&over_supply=3000&startyear=2021&endyear=actual&color=2021,00ff00;2022,ff0000`
 
 
 ## Electric Meter Statistics
@@ -49,6 +52,8 @@ The "em.php" script list and visualizes the [Electric Meter](https://github.com/
 | lang | x | x | Script output language selection. Possible values: "de" or "en". |
 | table_borders | x | x | Hides table borders in HTML by setting it to "no". |
 | chart | x | x | Chart selection. Multiple values possible: "all", "year" or "month". |
+| startyear | x | x | Defines the first year the statistic should be generated for. Values can be "actual" or the 4-digit year number. |
+| endyear | x | x | Defines the last year the statistic should be generated for. Values can be "actual" or the 4-digit year number. |
 | timing | - | x | Debug option to show script runtimes |
 
 Example request: `http://192.168.1.1:8080/em.php?lang=de&table_borders=no&chart=month&timing`
@@ -72,6 +77,9 @@ The "em.php" script list and visualizes the [Water Meter](https://github.com/Fro
 | chart | wmchart | x | Chart selection. Multiple values possible: "all", "year", "month" or "day". |
 | onlychart | - | x | Show only Chart graph(s) but no tables |
 | days | wmdays | x | Show only defined number of days in day table (0 = all). |
+| color | wmcolor | x | Define the graph colors for each year. Default: "*2021,000055;2022,000022*". Values must be in format "\<year>,\<colorcode>". Multiple years seperated by ";". |
+| startyear | x | x | Defines the first year the statistic should be generated for. Values can be "actual" or the 4-digit year number. |
+| endyear | x | x | Defines the last year the statistic should be generated for. Values can be "actual" or the 4-digit year number. |
 | timing | - | x | Debug option to show script runtimes |
 
 Example request: `http://192.168.1.1:8080/wm.php?lang=de&table_borders=no&chart=monthday&timing`

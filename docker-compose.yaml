@@ -39,4 +39,6 @@ services:
       - wmonlychart=no
       - wmdays=14
       - wmcolor=2021,000055;2022,000022
+      - startyear=2020
+      - endyear=actual
     restart: unless-stopped
