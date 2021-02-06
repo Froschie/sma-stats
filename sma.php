@@ -26,8 +26,8 @@ $database = $client->selectDB($influx_sma_db);
 require __DIR__ . '/script_functions.php';
 
 // language definition and value check
-$dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 13 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit', 18 => 'Tag', 19 => 'Max. 5min Solar', 20 => 'Erste Zeit >', 21 => 'Letzte Zeit >', 22 => 'Minimalster Strom Verbrauch', 23 => 'Zeit ohne Netzbezg', 24 => 'Ladeleistung Auto >', 25 => 'Einspeisung über ', 26 => 'Generierungzeit Stunden Tabelle', 27 => 'Monat / Stunde', 28 => '\'Jan\', \'Feb\', \'Mär\', \'Apr\', \'Mai\', \'Jun\', \'Jul\', \'Aug\', \'Sep\', \'Okt\', \'Nov\', \'Dez\'');
-$dict['en'] = array(1 => 'Year', 2 => 'Solar', 3 => 'Grid', 4 => 'Consumption', 5 => 'Supply', 6 => 'Own Consumption', 7 => 'Self Consumption', 8 => 'Self Sufficiency', 9 => 'Chart', 10 => "Month", 11 => 'Solar Energy Generation per Year', 12 => 'Solar Energy per Months', 13 => 'Solar Energy per Day of the Year', 14 => 'Year Table Generation Time', 15 => 'Month Table Generation Time', 16 => 'Day Table Generation Time', 17 => 'Total Generation Time', 18 => 'Day', 19 => 'Peak 5min Solar', 20 => 'First time >', 21 => 'Last time >', 22 => 'Minium Power Consumption', 23 => 'Time without grid power', 24 => 'Car charging power >', 25 => 'Grid supply over ', 26 => 'Hour Table Generation Time', 27 => 'Month / Hour', 28 => '\'Jan\', \'Feb\', \'Mar\', \'Apr\', \'May\', \'Jun\', \'Jul\', \'Aug\', \'Sep\', \'Oct\', \'Nov\', \'Dec\'');
+$dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 13 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit', 18 => 'Tag', 19 => 'Max. 5min Solar', 20 => 'Erste Zeit >', 21 => 'Letzte Zeit >', 22 => 'Minimalster Strom Verbrauch', 23 => 'Zeit ohne Netzbezg', 24 => 'Ladeleistung Auto >', 25 => 'Einspeisung über ', 26 => 'Generierungzeit Stunden Tabelle', 27 => 'Monat / Stunde', 28 => '\'Jan\', \'Feb\', \'Mär\', \'Apr\', \'Mai\', \'Jun\', \'Jul\', \'Aug\', \'Sep\', \'Okt\', \'Nov\', \'Dez\'', 29 => 'Solar Erzeugung pro Stunde jedes Monats');
+$dict['en'] = array(1 => 'Year', 2 => 'Solar', 3 => 'Grid', 4 => 'Consumption', 5 => 'Supply', 6 => 'Own Consumption', 7 => 'Self Consumption', 8 => 'Self Sufficiency', 9 => 'Chart', 10 => "Month", 11 => 'Solar Energy Generation per Year', 12 => 'Solar Energy per Months', 13 => 'Solar Energy per Day of the Year', 14 => 'Year Table Generation Time', 15 => 'Month Table Generation Time', 16 => 'Day Table Generation Time', 17 => 'Total Generation Time', 18 => 'Day', 19 => 'Peak 5min Solar', 20 => 'First time >', 21 => 'Last time >', 22 => 'Minium Power Consumption', 23 => 'Time without grid power', 24 => 'Car charging power >', 25 => 'Grid supply over ', 26 => 'Hour Table Generation Time', 27 => 'Month / Hour', 28 => '\'Jan\', \'Feb\', \'Mar\', \'Apr\', \'May\', \'Jun\', \'Jul\', \'Aug\', \'Sep\', \'Oct\', \'Nov\', \'Dec\'', 29 => 'Solar Energy per Hour of each Month');
 switch(getenv('lang')) {
     case "en":
         $script_lang = "en";
@@ -892,10 +892,35 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'hour') !== 
           <th style=\"width: 40px\">20</th>
           <th style=\"width: 40px\">21</th>
           <th style=\"width: 40px\">22</th>
-          <th style=\"width: 40px\">23</th>
-        <tr>\n";
-        ksort($hour_array);
-        foreach (array_keys($hour_array) as $month) {
+          <th style=\"width: 40px\">23</th>";
+          if (!$script_onlytable) {
+            $hour_html_table = $hour_html_table."\n          <th style=\"width: 710px\">".t(9)."</th>\n";
+        }
+        $hour_html_table = $hour_html_table."        </tr>\n";
+        $hour_chart_array = array();
+        $hour_first = 23;
+        $hour_last = 0;
+        $hour_min = 10000;
+        $hour_max = 0;
+        for($month = 1; $month<=12; $month++) {
+            for ($hour = 0; $hour <= 23; $hour++) {
+                if (isset($hour_array[$month][$hour])) {
+                    if ($hour_array[$month][$hour]['no_values'] > 0 && $hour_array[$month][$hour]['value'] > 0) {
+                        if ($hour > $hour_last) {
+                            $hour_last = $hour;
+                        }
+                        if ($hour < $hour_first) {
+                            $hour_first = $hour;
+                        }
+                    }
+                }
+              }
+        }
+        $hour_list = array();
+        for($hour = $hour_first; $hour<=$hour_last; $hour++) {
+            $hour_list[] = $hour;
+        }
+        for($month = 1; $month<=12; $month++) {
             $hour_html_table = $hour_html_table."    <tr>
           <td>".$month."</td>\n";
             for ($hour = 0; $hour <= 23; $hour++) {
@@ -904,6 +929,13 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'hour') !== 
                 if (isset($hour_array[$month][$hour])) {
                     if ($hour_array[$month][$hour]['no_values'] > 0 && $hour_array[$month][$hour]['value'] > 0) {
                         $hour_value = round($hour_array[$month][$hour]['value']/$hour_array[$month][$hour]['no_values'], 0);
+                        $hour_chart_array[] = [12-$month, $hour-$hour_first, $hour_value];
+                        if ($hour_value > $hour_max) {
+                            $hour_max = $hour_value;
+                        }
+                        if ($hour_value < $hour_min) {
+                            $hour_min = $hour_value;
+                        }
                     }
                 } else {
                     $hour_value = 0;
@@ -912,10 +944,66 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'hour') !== 
               }
             $hour_html_table = $hour_html_table."    </tr>\n";
         }
-        $hour_html_table = $hour_html_table."        </tr>
-      </table>\n";
+        $hour_html_table = $hour_html_table."  </table>";
+      if ($hour_min == 10000) { $hour_min = 0; }
+      $hour_html_script = "\n  <script type=\"text/javascript\">
+      var myChart = echarts.init(document.getElementById('div_hours'));
+
+      var data = ".json_encode(array_values($hour_chart_array)).";
+
+      data = data.map(function (item) {
+          return [item[1], item[0], item[2] || '-'];
+      });
+      
+      option = {
+          title: {
+              text: '".t(29)."',
+              textStyle: {
+                  fontSize: 14
+              },
+              left: 'left'
+          },
+          tooltip: {
+              position: 'top'
+          },
+          grid: {
+            top: '30px',
+            left: '5px',
+            right: '5px',
+            bottom: '5px',
+            containLabel: true
+          },
+          xAxis: {
+              type: 'category',
+              data: ".json_encode(array_values($hour_list)).",
+              splitArea: {
+                  show: true
+              }
+          },
+          yAxis: {
+              type: 'category',
+              data: ['12', '11', '10', '9', '8', '7', '6','5', '4', '3', '2','1'],
+              splitArea: {
+                  show: true
+              }
+          },
+          visualMap: {
+              min: ".$hour_min.",
+              max: ".$hour_max.",
+              show: false
+          },
+          series: [{
+              type: 'heatmap',
+              data: data,
+              label: {
+                  show: true
+              }
+          }]
+      };
+      myChart.setOption(option);
+  </script>\n";
         // output selection of table or only chart
-        output($script_onlychart, $script_onlytable, "", "", $hour_html_table);
+        output($script_onlychart, $script_onlytable, "div_hours", $hour_html_script, $hour_html_table);
     }
     // end debug timing for day chart
     $hour_time_end = hrtime(true);

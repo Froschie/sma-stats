@@ -147,6 +147,7 @@ curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/Dockerfile
 curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/sma.php
 curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/em.php
 curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/wm.php
+curl -O https://raw.githubusercontent.com/Froschie/sma-stats/master/script_functions.php
 docker build --tag sma-stats .
 ```
 

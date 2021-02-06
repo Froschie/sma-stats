@@ -25,3 +25,4 @@ ENV smadb_ip="192.168.1.3" smadb_port="8086" smadb_db="SMA" smadb_user="user" sm
 ADD ./sma.php /var/www/html/sma.php
 ADD ./em.php /var/www/html/em.php
 ADD ./wm.php /var/www/html/wm.php
+ADD ./script_functions.php /var/www/html/script_functions.php
