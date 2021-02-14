@@ -16,7 +16,7 @@ RUN echo "date.timezone = Europe/Berlin" > $PHP_INI_DIR/conf.d/php-datetime.ini
 RUN cd /var/www/html/ && curl -OL https://github.com/apache/echarts/raw/master/dist/echarts.js
 
 # Image Description
-LABEL version="1.7" description="Script to visualize statistics about SMA Inverter and other meters." 
+LABEL version="1.8" description="Script to visualize statistics about SMA Inverter and other meters." 
 
 # default Environment Variables  for Script
 ENV smadb_ip="192.168.1.3" smadb_port="8086" smadb_db="SMA" smadb_user="user" smadb_pw="pw" lang="en" table_borders="yes" chart="all" emdb_ip="192.168.1.3" emdb_port="8086" emdb_db="measurements" emdb_user="user" emdb_pw="pw" baseline="no" time_solar=0 max_solar="no" days=0 onlytable="no" nounits="no" onlychart="no" color="2021,00ff00;2022,ff0000" wmcolor="2021,000055;2022,000022"

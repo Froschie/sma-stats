@@ -87,4 +87,35 @@ function year_act($year_act, $f_year, $l_year) {
     }
     return $year_act;
 }
+
+// variable check type bool
+function check_input_bool($variable, $default) {
+    $value = $default;
+    switch(getenv($variable)) {
+    case "yes":
+        $value = TRUE;
+    }
+    if (isset($_GET[$variable])) {
+        if ($_GET[$variable] != "no") {
+            $value = TRUE;
+        } else {
+            $value = FALSE;
+        }
+    }
+    return $value;
+}
+
+// variable check type int
+function check_input_int($variable, $default) {
+    $value = $default;
+    if (getenv($variable) > 0) {
+        $value = getenv($variable);
+    }
+    if (isset($_GET[$variable])) {
+        if ($_GET[$variable] > 0) {
+            $value = $_GET[$variable];
+        }
+    }
+    return $value;
+}
 ?>

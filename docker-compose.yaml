@@ -41,4 +41,5 @@ services:
       - wmcolor=2021,000055;2022,000022
       - startyear=2020
       - endyear=actual
+      - breakstep=5
     restart: unless-stopped

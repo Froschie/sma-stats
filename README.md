@@ -17,7 +17,8 @@ The "sma.php" script list and visualizes the [SMA Query](https://github.com/Fros
 | smadb_pw | x | - | InfluxDB Password |
 | lang | x | x | Script output language selection. Possible values: "de" or "en". |
 | table_borders | x | x | Hides table borders in HTML by setting it to "no". |
-| chart | x | x | Chart selection. Multiple values possible: "all", "year", "month" or "day". |
+| chart | x | x | Chart selection. Multiple values possible: "all", "year", "breakdown", "month" or "day". |
+| breakstep | x | x | Steps for the Breakdown table/charts in kWh. Default value = 5. |
 | onlychart | x | x | Show only Chart graph(s) but no tables. |
 | onlytable | x | x | Show only HTML table and no graphs. |
 | max_solar | x | x | Shows max. peak solar generation within 5min periode from year/month/day if set to "yes". |

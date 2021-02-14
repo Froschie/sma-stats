@@ -26,8 +26,8 @@ $database = $client->selectDB($influx_sma_db);
 require __DIR__ . '/script_functions.php';
 
 // language definition and value check
-$dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 13 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit', 18 => 'Tag', 19 => 'Max. 5min Solar', 20 => 'Erste Zeit >', 21 => 'Letzte Zeit >', 22 => 'Minimalster Strom Verbrauch', 23 => 'Zeit ohne Netzbezg', 24 => 'Ladeleistung Auto >', 25 => 'Einspeisung über ', 26 => 'Generierungzeit Stunden Tabelle', 27 => 'Monat / Stunde', 28 => '\'Jan\', \'Feb\', \'Mär\', \'Apr\', \'Mai\', \'Jun\', \'Jul\', \'Aug\', \'Sep\', \'Okt\', \'Nov\', \'Dez\'', 29 => 'Solar Erzeugung pro Stunde jedes Monats');
-$dict['en'] = array(1 => 'Year', 2 => 'Solar', 3 => 'Grid', 4 => 'Consumption', 5 => 'Supply', 6 => 'Own Consumption', 7 => 'Self Consumption', 8 => 'Self Sufficiency', 9 => 'Chart', 10 => "Month", 11 => 'Solar Energy Generation per Year', 12 => 'Solar Energy per Months', 13 => 'Solar Energy per Day of the Year', 14 => 'Year Table Generation Time', 15 => 'Month Table Generation Time', 16 => 'Day Table Generation Time', 17 => 'Total Generation Time', 18 => 'Day', 19 => 'Peak 5min Solar', 20 => 'First time >', 21 => 'Last time >', 22 => 'Minium Power Consumption', 23 => 'Time without grid power', 24 => 'Car charging power >', 25 => 'Grid supply over ', 26 => 'Hour Table Generation Time', 27 => 'Month / Hour', 28 => '\'Jan\', \'Feb\', \'Mar\', \'Apr\', \'May\', \'Jun\', \'Jul\', \'Aug\', \'Sep\', \'Oct\', \'Nov\', \'Dec\'', 29 => 'Solar Energy per Hour of each Month');
+$dict['de'] = array(1 => 'Jahr', 2 => 'Solar', 3 => 'Netzbezug', 4 => 'Verbrauch', 5 => 'Einspeisung', 6 => 'Eigen- verbrauch', 7 => 'Eigen- verbrauchsquote', 8 => 'Autarkie- grad', 9 => 'Grafik', 10 => "Monat", 11 => 'Solar Erzeugung pro Jahr', 12 => 'Solar Erzeugung pro Monat', 13 => 'Solar Erzeugung pro Tag des Jahres', 14 => 'Generierungzeit Jahres Tabelle', 15 => 'Generierungzeit Monats Tabelle', 16 => 'Generierungzeit Tages Tabelle', 17 => 'Gesamt Generierungzeit', 18 => 'Tag', 19 => 'Max. 5min Solar', 20 => 'Erste Zeit >', 21 => 'Letzte Zeit >', 22 => 'Minimalster Strom Verbrauch', 23 => 'Zeit ohne Netzbezg', 24 => 'Ladeleistung Auto >', 25 => 'Einspeisung über ', 26 => 'Generierungzeit Stunden Tabelle', 27 => 'Monat / Stunde', 28 => '\'Jan\', \'Feb\', \'Mär\', \'Apr\', \'Mai\', \'Jun\', \'Jul\', \'Aug\', \'Sep\', \'Okt\', \'Nov\', \'Dez\'', 29 => 'Solar Erzeugung pro Stunde jedes Monats', 30 => 'Generierungzeit Breakdown Tabelle', 31 => 'Tage mit ', 32 => 'Solar Erzeugung pro Tag');
+$dict['en'] = array(1 => 'Year', 2 => 'Solar', 3 => 'Grid', 4 => 'Consumption', 5 => 'Supply', 6 => 'Own Consumption', 7 => 'Self Consumption', 8 => 'Self Sufficiency', 9 => 'Chart', 10 => "Month", 11 => 'Solar Energy Generation per Year', 12 => 'Solar Energy per Months', 13 => 'Solar Energy per Day of the Year', 14 => 'Year Table Generation Time', 15 => 'Month Table Generation Time', 16 => 'Day Table Generation Time', 17 => 'Total Generation Time', 18 => 'Day', 19 => 'Peak 5min Solar', 20 => 'First time >', 21 => 'Last time >', 22 => 'Minium Power Consumption', 23 => 'Time without grid power', 24 => 'Car charging power >', 25 => 'Grid supply over ', 26 => 'Hour Table Generation Time', 27 => 'Month / Hour', 28 => '\'Jan\', \'Feb\', \'Mar\', \'Apr\', \'May\', \'Jun\', \'Jul\', \'Aug\', \'Sep\', \'Oct\', \'Nov\', \'Dec\'', 29 => 'Solar Energy per Hour of each Month', 30 => 'Breakdown Table Generation Time', 31 => 'Days with ', 32 => 'Solar Energy per Day');
 switch(getenv('lang')) {
     case "en":
         $script_lang = "en";
@@ -192,6 +192,9 @@ if (isset($_GET['nogrid_time'])) {
         $script_nogrid_time = FALSE;
     }
 }
+
+// only table output value check
+$breakdown_step = check_input_int("breakstep", 5);
 
 // base line power (lowest power consumption during 5min)
 $script_base_line = FALSE;
@@ -395,6 +398,124 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
     output($script_onlychart, $script_onlytable, "div_years", $year_html_script, $year_html_table);
     // end debug timing for year chart
     $year_time_end = hrtime(true);
+    }
+}
+
+// breakdown chart
+if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'breakdown') !== false) {
+    // only continue if really data is available in database
+    if (isset($year_first)) {
+        // start debug timing for day chart
+        $breakdown_time_start = hrtime(true);
+        // variable initialization
+        $year = $year_first;
+        $year_array = array();
+        $breakdown_table = array();
+        $breakdown_array = array();
+        // query highest solar value
+        $result = $database->query('SELECT max(solar_daily) as solar_max FROM totals_daily');
+        $points = $result->getPoints();
+        $breakdown_steps = ceil($points[0]['solar_max']/1000/$breakdown_step);
+        // loop for first to actual year
+        while ($year <= $year_act) {
+            // variable initialization
+            $breakdown_html_table = array();
+            $breakdown_html_table[] = "  <table>\n    <tr>\n        <th style=\"width: 70px\">".t(1)."</th>";
+            for ($i = 0; $i < ($breakdown_steps*$breakdown_step); ) {
+                $breakdown_array[$year][$i] = 0;
+                $breakdown_html_table[] = "        <th style=\"width: 90px\">".t(31).$i."-".$i+$breakdown_step." kWh</th>";
+                $i = $i+$breakdown_step;
+            }
+            if (!$script_onlytable) {
+                $breakdown_html_table[] = "      <th style=\"width: 710px\">".t(9)."</th>";
+            }
+            // define start and end time of the loop year
+            $start_time = mktime(0, 0, 0, 1, 1, $year);
+            $end_time = mktime(0, 0, 0, 1, 1, $year+1);
+            // InfluxDB query for whole year incl. Timezone setting!
+            $result = $database->query('SELECT solar_daily AS solar FROM totals_daily WHERE time>='.$start_time.'s and time<'.$end_time.'s tz(\'Europe/Berlin\')');
+            $points = $result->getPoints();
+            foreach ($points as $day) {
+                $solar = round($day['solar']/1000, 2);
+                $breakdown_field = floor($solar/$breakdown_step)*$breakdown_step;
+                $breakdown_array[$year][$breakdown_field] = $breakdown_array[$year][$breakdown_field] + 1;
+            }
+            // generate table entries
+            $breakdown_table[] = "    <tr>\n        <td>".$year."</td>";
+            foreach ($breakdown_array[$year] as $value) {
+                $breakdown_table[] = "        <td>".$value."</td>";
+            }
+            $breakdown_table[] = "      </tr>";
+            $year_array[] = $year;
+            $year = $year + 1;
+        }
+        // generate JSON for chart series
+        $breakdown_series = array();
+        for ($i = 0; $i < ($breakdown_steps*$breakdown_step); ) {
+            $breakdown_serie = array();
+            foreach ($breakdown_array as $year) {
+                $breakdown_serie[] = $year[$i];
+            }
+            $breakdown_series[] = "{
+                name: '".$i."-".$i+$breakdown_step."',
+                type: 'bar',
+                stack: 'one',
+                emphasis: {
+                    focus: 'series'
+                },
+                data: ".json_encode(array_values($breakdown_serie))."
+            }";
+            $i = $i+$breakdown_step;
+        }
+    // after looping through all years, generate the table
+    $breakdown_html_table[] = "    </tr>\n".join("\n", $breakdown_table)."  </table>\n";
+    $breakdown_html_table = join("\n", $breakdown_html_table);
+    $breakdown_html_script = "  <script type=\"text/javascript\">
+    var myChart = echarts.init(document.getElementById('div_breakdown'));
+    var option = {
+        title: {
+            text: '".t(32)."',
+            textStyle: {
+                fontSize: 14
+            },
+            left: 'left'
+        },
+        tooltip: {
+            trigger: 'axis',
+            formatter: function (params) {
+                var tooltipString = `<b>\${params[0].axisValue}</b>`; 
+                params.forEach(function (item, index) {
+                    console.log(item, index);
+                    tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value}</span>`
+                });
+                return tooltipString;
+            },
+            axisPointer: {
+                animation: false
+            }
+        },
+        grid: {
+            top: '35px',
+            left: '5px',
+            right: '5px',
+            bottom: '5px',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            data: ".json_encode(array_values($year_array))."
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [".join(",\n            ", $breakdown_series)."]
+    };
+    myChart.setOption(option);
+</script>\n";
+    // output selection of table or only chart
+    output($script_onlychart, $script_onlytable, "div_breakdown", $breakdown_html_script, $breakdown_html_table);
+    // end debug timing for day chart
+    $breakdown_time_end = hrtime(true);
     }
 }
 
@@ -1015,6 +1136,10 @@ if ($script_timing) {
         $year_runtime = round(($year_time_end-$year_time_start)/1e+6, 0);
         print("  ".t(14).": ".$year_runtime."ms\n  <br>\n");
     }
+    if (isset($breakdown_time_start) && isset($breakdown_time_end)) {
+        $breakdown_runtime = round(($breakdown_time_end-$breakdown_time_start)/1e+6, 0);
+        print("  ".t(30).": ".$breakdown_runtime."ms\n  <br>\n");
+    }
     if (isset($month_time_start) && isset($month_time_end)) {
         $month_runtime = round(($month_time_end-$month_time_start)/1e+6, 0);
         print("  ".t(15).": ".$month_runtime."ms\n  <br>\n");
@@ -1026,7 +1151,7 @@ if ($script_timing) {
     if (isset($hour_time_start) && isset($hour_time_end)) {
       $hour_runtime = round(($hour_time_end-$hour_time_start)/1e+6, 0);
       print("  ".t(26).": ".$hour_runtime."ms\n  <br>\n");
-  }
+    }
     $script_time_end = hrtime(true);
     $script_runtime = round(($script_time_end-$script_time_start)/1e+6, 0);
     print("  ".t(17).": ".$script_runtime."ms\n  <br>\n");
