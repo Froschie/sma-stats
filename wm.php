@@ -94,29 +94,7 @@ function d($value) {
 }
 
 // table border value check
-switch(getenv('wmtable_borders')) {
-    case "no":
-        $script_table_borders = FALSE;
-        break;
-    default:
-        $script_table_borders = TRUE;
-}
-if (isset($_GET['table_borders'])) {
-    switch($_GET['table_borders']) {
-        case "no":
-            $script_table_borders = FALSE;
-            break;
-        default:
-            $script_table_borders = TRUE;
-    }
-}
-if ($script_table_borders) {
-    $table_border = "\n    table, th, td {
-      border: 1px solid black;
-    }";
-} else {
-    $table_border = "";
-}
+$table_border = table_border_code(check_input_bool("wmtable_borders", "table_borders", TRUE));
 
 // chart value check
 $script_chart = getenv('wmchart');
@@ -132,15 +110,7 @@ if (isset($_GET['onlychart'])) {
 }
 
 // days for day table
-$script_days = 0;
-if (getenv('wmdays') > 0) {
-    $script_days = getenv('wmdays');
-}
-if (isset($_GET['days'])) {
-    if ($_GET['days'] >= 0) {
-        $script_days = $_GET['days'];
-    }
-}
+$script_days = check_input_int("wmdays", "days", 0);
 
 // html header
 print("<!DOCTYPE html>

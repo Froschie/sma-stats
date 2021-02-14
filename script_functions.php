@@ -89,14 +89,14 @@ function year_act($year_act, $f_year, $l_year) {
 }
 
 // variable check type bool
-function check_input_bool($variable, $default) {
+function check_input_bool($env_variable, $get_variable, $default) {
     $value = $default;
-    switch(getenv($variable)) {
+    switch(getenv($env_variable)) {
     case "yes":
         $value = TRUE;
     }
-    if (isset($_GET[$variable])) {
-        if ($_GET[$variable] != "no") {
+    if (isset($_GET[$get_variable])) {
+        if ($_GET[$get_variable] != "no") {
             $value = TRUE;
         } else {
             $value = FALSE;
@@ -106,16 +106,27 @@ function check_input_bool($variable, $default) {
 }
 
 // variable check type int
-function check_input_int($variable, $default) {
+function check_input_int($env_variable, $get_variable, $default) {
     $value = $default;
-    if (getenv($variable) > 0) {
-        $value = getenv($variable);
+    if (getenv($env_variable) > 0) {
+        $value = getenv($env_variable);
     }
-    if (isset($_GET[$variable])) {
-        if ($_GET[$variable] > 0) {
-            $value = $_GET[$variable];
+    if (isset($_GET[$get_variable])) {
+        if ($_GET[$get_variable] >= 0) {
+            $value = $_GET[$get_variable];
         }
     }
     return $value;
+}
+
+// table border html code
+function table_border_code($border) {
+    if ($border) {
+        return "\n    table, th, td {
+          border: 1px solid black;
+        }";
+    } else {
+        return "";
+    }
 }
 ?>

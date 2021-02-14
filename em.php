@@ -78,29 +78,7 @@ function d($value) {
 }
 
 // table border value check
-switch(getenv('table_borders')) {
-    case "no":
-        $script_table_borders = FALSE;
-        break;
-    default:
-        $script_table_borders = TRUE;
-}
-if (isset($_GET['table_borders'])) {
-    switch($_GET['table_borders']) {
-        case "no":
-            $script_table_borders = FALSE;
-            break;
-        default:
-            $script_table_borders = TRUE;
-    }
-}
-if ($script_table_borders) {
-    $table_border = "\n    table, th, td {
-      border: 1px solid black;
-    }";
-} else {
-    $table_border = "";
-}
+$table_border = table_border_code(check_input_bool("table_borders", "table_borders", TRUE));
 
 // chart value check
 $script_chart = getenv('chart');

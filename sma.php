@@ -93,122 +93,31 @@ function d($value) {
 }
 
 // table border value check
-switch(getenv('table_borders')) {
-    case "no":
-        $script_table_borders = FALSE;
-        break;
-    default:
-        $script_table_borders = TRUE;
-}
-if (isset($_GET['table_borders'])) {
-    switch($_GET['table_borders']) {
-        case "no":
-            $script_table_borders = FALSE;
-            break;
-        default:
-            $script_table_borders = TRUE;
-    }
-}
-if ($script_table_borders) {
-    $table_border = "\n    table, th, td {
-      border: 1px solid black;
-    }";
-} else {
-    $table_border = "";
-}
+$table_border = table_border_code(check_input_bool("table_borders", "table_borders", TRUE));
 
 // max solar production value check
-$script_max_solar = FALSE;
-switch(getenv('max_solar')) {
-    case "yes":
-        $script_max_solar = TRUE;
-}
-if (isset($_GET['max_solar'])) {
-    if ($_GET['max_solar'] != "no") {
-        $script_max_solar = TRUE;
-    } else {
-        $script_max_solar = FALSE;
-    }
-}
+$script_max_solar = check_input_bool("max_solar", "max_solar", FALSE);
 
 // solar times
-$script_time_solar = 0;
-if (getenv('time_solar') > 0) {
-    $script_time_solar = getenv('time_solar');
-}
-if (isset($_GET['time_solar'])) {
-    if ($_GET['time_solar'] > 0) {
-        $script_time_solar = $_GET['time_solar'];
-    } elseif ($_GET['time_solar'] == 0) {
-        $script_time_solar = 0;
-    } else {
-        $script_time_solar = 100;
-    }
-}
+$script_time_solar = check_input_int("time_solar", "time_solar", 0);
 
 // days for day table
-$script_days = 0;
-if (getenv('days') > 0) {
-    $script_days = getenv('days');
-}
-if (isset($_GET['days'])) {
-    if ($_GET['days'] >= 0) {
-        $script_days = $_GET['days'];
-    }
-}
+$script_days = check_input_int("days", "days", 0);
 
 // car charging
-$script_car_charging = 0;
-if (getenv('car_charging') > 0) {
-    $script_car_charging = getenv('car_charging');
-}
-if (isset($_GET['car_charging'])) {
-    if ($_GET['car_charging'] > 0) {
-        $script_car_charging = $_GET['car_charging'];
-    }
-}
+$script_car_charging = check_input_int("car_charging", "car_charging", 0);
 
 // over supply
-$script_over_supply = 0;
-if (getenv('over_supply') > 0) {
-    $script_over_supply = getenv('over_supply');
-}
-if (isset($_GET['over_supply'])) {
-    if ($_GET['over_supply'] > 0) {
-        $script_over_supply = $_GET['over_supply'];
-    }
-}
+$script_over_supply = check_input_int("over_supply", "over_supply", 0);
 
 // time without power from grid
-$script_nogrid_time = FALSE;
-switch(getenv('nogrid_time')) {
-    case "yes":
-        $script_nogrid_time = TRUE;
-}
-if (isset($_GET['nogrid_time'])) {
-    if ($_GET['nogrid_time'] != "no") {
-        $script_nogrid_time = TRUE;
-    } else {
-        $script_nogrid_time = FALSE;
-    }
-}
+$script_nogrid_time = check_input_bool("nogrid_time", "nogrid_time", FALSE);
 
 // only table output value check
-$breakdown_step = check_input_int("breakstep", 5);
+$breakdown_step = check_input_int("breakstep", "breakstep", 5);
 
 // base line power (lowest power consumption during 5min)
-$script_base_line = FALSE;
-switch(getenv('baseline')) {
-    case "yes":
-        $script_base_line = TRUE;
-}
-if (isset($_GET['baseline'])) {
-    if ($_GET['baseline'] != "no") {
-        $script_base_line = TRUE;
-    } else {
-        $script_base_line = FALSE;
-    }
-}
+$script_base_line = check_input_bool("baseline", "baseline", FALSE);
 
 // hide unit description in table
 $unit_kwh = " kWh";
@@ -230,32 +139,10 @@ if (isset($_GET['chart'])) {
 }
 
 // only chart output value check
-$script_onlychart = FALSE;
-switch(getenv('onlychart')) {
-  case "yes":
-      $script_onlychart = TRUE;
-}
-if (isset($_GET['onlychart'])) {
-  if ($_GET['onlychart'] != "no") {
-      $script_onlychart = TRUE;
-  } else {
-      $script_onlychart = FALSE;
-  }
-}
+$script_onlychart = check_input_bool("onlychart", "onlychart", FALSE);
 
 // only table output value check
-$script_onlytable = FALSE;
-switch(getenv('onlytable')) {
-  case "yes":
-      $script_onlytable = TRUE;
-}
-if (isset($_GET['onlytable'])) {
-  if ($_GET['onlytable'] != "no") {
-      $script_onlytable = TRUE;
-  } else {
-      $script_onlytable = FALSE;
-  }
-}
+$script_onlytable = check_input_bool("onlytable", "onlytable", FALSE);
 
 // set first and last year for query
 $f_year = inf_query_year('SELECT first(solar_total) FROM totals tz(\'Europe/Berlin\')');
