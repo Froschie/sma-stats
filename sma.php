@@ -370,10 +370,16 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'breakdown')
         tooltip: {
             trigger: 'axis',
             formatter: function (params) {
-                var tooltipString = `<b>\${params[0].axisValue}</b>`; 
+                var tooltipString = `<b>\${params[0].axisValue}</b>`;
+                total = 0;
                 params.forEach(function (item, index) {
-                    console.log(item, index);
-                    tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value}</span>`
+                    total = total + item.value;                    
+                });
+                params.forEach(function (item, index) {
+                    if (item.value > 0) {
+                        percent = ((item.value/total)*100).toFixed(1);
+                        tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value} (\${percent}%)</span>`
+                    }
                 });
                 return tooltipString;
             },
