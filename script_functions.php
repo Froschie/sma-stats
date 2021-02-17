@@ -20,8 +20,8 @@ function output($script_onlychart, $script_onlytable, $div, $html_script, $html_
         $chart_row = "";
         if ($div != "") {
             $chart_row = "  <td rowspan=\"1000\" style=\"vertical-align: top\">
-            <div id=\"".$div."\" style=\"width: 650px; height: 320px\"></div>
-        </td>\n    ";
+        <div id=\"".$div."\" style=\"width: 650px; height: 320px\"></div>
+      </td>\n    ";
         }
         $html_table = substr_replace($html_table, $chart_row, $tr2, 0);
         print($html_table.$html_script."  <br>\n");
@@ -123,8 +123,8 @@ function check_input_int($env_variable, $get_variable, $default) {
 function table_border_code($border) {
     if ($border) {
         return "\n    table, th, td {
-          border: 1px solid black;
-        }";
+      border: 1px solid black;
+    }";
     } else {
         return "";
     }

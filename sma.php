@@ -247,40 +247,40 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
     $year_html_script = "  <script type=\"text/javascript\">
     var myChart = echarts.init(document.getElementById('div_years'));
     var option = {
-        title: {
-            text: '".t(11)."',
-            textStyle: {
-                fontSize: 14
-            },
-            left: 'left'
+      title: {
+        text: '".t(11)."',
+        textStyle: {
+          fontSize: 14
         },
-        tooltip: {
-            trigger: 'axis'
-        },
-        grid: {
-            top: '35px',
-            left: '5px',
-            right: '5px',
-            bottom: '5px',
-            containLabel: true
-        },
-        xAxis: {
-            type: 'category',
-            data: ".json_encode(array_values($year_array))."
-        },
-        yAxis: {
-            type: 'value'
-        },
-        series: [{
-            data: ".json_encode(array_values($year_solar)).",
-            type: 'bar',
-            itemStyle: {
-                    color: '".$color_default."'
-            }
-        }]
+        left: 'left'
+      },
+      tooltip: {
+        trigger: 'axis'
+      },
+      grid: {
+        top: '35px',
+        left: '5px',
+        right: '5px',
+        bottom: '5px',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: ".json_encode(array_values($year_array))."
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [{
+        data: ".json_encode(array_values($year_solar)).",
+        type: 'bar',
+        itemStyle: {
+          color: '".$color_default."'
+        }
+      }]
     };
     myChart.setOption(option);
-</script>\n";
+  </script>\n";
     // output selection of table or only chart
     output($script_onlychart, $script_onlytable, "div_years", $year_html_script, $year_html_table);
     // end debug timing for year chart
@@ -307,10 +307,10 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'breakdown')
         while ($year <= $year_act) {
             // variable initialization
             $breakdown_html_table = array();
-            $breakdown_html_table[] = "  <table>\n    <tr>\n        <th style=\"width: 70px\">".t(1)."</th>";
+            $breakdown_html_table[] = "  <table>\n    <tr>\n      <th style=\"width: 70px\">".t(1)."</th>";
             for ($i = 0; $i < ($breakdown_steps*$breakdown_step); ) {
                 $breakdown_array[$year][$i] = 0;
-                $breakdown_html_table[] = "        <th style=\"width: 90px\">".t(31).$i."-".$i+$breakdown_step." kWh</th>";
+                $breakdown_html_table[] = "      <th style=\"width: 90px\">".t(31).$i."-".$i+$breakdown_step." kWh</th>";
                 $i = $i+$breakdown_step;
             }
             if (!$script_onlytable) {
@@ -328,11 +328,11 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'breakdown')
                 $breakdown_array[$year][$breakdown_field] = $breakdown_array[$year][$breakdown_field] + 1;
             }
             // generate table entries
-            $breakdown_table[] = "    <tr>\n        <td>".$year."</td>";
+            $breakdown_table[] = "    <tr>\n      <td>".$year."</td>";
             foreach ($breakdown_array[$year] as $value) {
-                $breakdown_table[] = "        <td>".$value."</td>";
+                $breakdown_table[] = "      <td>".$value."</td>";
             }
-            $breakdown_table[] = "      </tr>";
+            $breakdown_table[] = "    </tr>";
             $year_array[] = $year;
             $year = $year + 1;
         }
@@ -343,68 +343,68 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'breakdown')
             foreach ($breakdown_array as $year) {
                 $breakdown_serie[] = $year[$i];
             }
-            $breakdown_series[] = "{
-                name: '".$i."-".$i+$breakdown_step."',
-                type: 'bar',
-                stack: 'one',
-                emphasis: {
-                    focus: 'series'
-                },
-                data: ".json_encode(array_values($breakdown_serie))."
-            }";
+            $breakdown_series[] = "        {
+          name: '".$i."-".$i+$breakdown_step."',
+          type: 'bar',
+          stack: 'one',
+          emphasis: {
+            focus: 'series'
+          },
+          data: ".json_encode(array_values($breakdown_serie))."
+        }";
             $i = $i+$breakdown_step;
         }
     // after looping through all years, generate the table
-    $breakdown_html_table[] = "    </tr>\n".join("\n", $breakdown_table)."  </table>\n";
+    $breakdown_html_table[] = "    </tr>\n".join("\n", $breakdown_table)."\n  </table>\n";
     $breakdown_html_table = join("\n", $breakdown_html_table);
     $breakdown_html_script = "  <script type=\"text/javascript\">
     var myChart = echarts.init(document.getElementById('div_breakdown'));
     var option = {
-        title: {
-            text: '".t(32)."',
-            textStyle: {
-                fontSize: 14
-            },
-            left: 'left'
+      title: {
+        text: '".t(32)."',
+        textStyle: {
+          fontSize: 14
         },
-        tooltip: {
-            trigger: 'axis',
-            formatter: function (params) {
-                var tooltipString = `<b>\${params[0].axisValue}</b>`;
-                total = 0;
-                params.forEach(function (item, index) {
-                    total = total + item.value;                    
-                });
-                params.forEach(function (item, index) {
-                    if (item.value > 0) {
-                        percent = ((item.value/total)*100).toFixed(1);
-                        tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value} (\${percent}%)</span>`
-                    }
-                });
-                return tooltipString;
-            },
-            axisPointer: {
-                animation: false
+        left: 'left'
+      },
+      tooltip: {
+        trigger: 'axis',
+        formatter: function (params) {
+          var tooltipString = `<b>\${params[0].axisValue}</b>`;
+          total = 0;
+          params.forEach(function (item, index) {
+            total = total + item.value;                    
+          });
+          params.forEach(function (item, index) {
+            if (item.value > 0) {
+              percent = ((item.value/total)*100).toFixed(1);
+              tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value} (\${percent}%)</span>`
             }
+          });
+          return tooltipString;
         },
-        grid: {
-            top: '35px',
-            left: '5px',
-            right: '5px',
-            bottom: '5px',
-            containLabel: true
-        },
-        xAxis: {
-            type: 'category',
-            data: ".json_encode(array_values($year_array))."
-        },
-        yAxis: {
-            type: 'value'
-        },
-        series: [".join(",\n            ", $breakdown_series)."]
+        axisPointer: {
+          animation: false
+        }
+      },
+      grid: {
+        top: '35px',
+        left: '5px',
+        right: '5px',
+        bottom: '5px',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: ".json_encode(array_values($year_array))."
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [\n".join(",\n", $breakdown_series)."\n      ]
     };
     myChart.setOption(option);
-</script>\n";
+  </script>\n";
     // output selection of table or only chart
     output($script_onlychart, $script_onlytable, "div_breakdown", $breakdown_html_script, $breakdown_html_table);
     // end debug timing for day chart
@@ -486,30 +486,36 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                 $month_chart = $month_chart.",";
             }
             $month_chart = $month_chart."
-          {
-                name: '".$year."',
-                data: ".json_encode(array_values($month_solar)).",
-                type: 'line',
-                smooth: true,
-                itemStyle: {
-                    color: '".c($year)."'
-                },
-                emphasis: {
-                    focus: 'series'
-                },
-                markPoint: {
-                    data: [
-                        {type: 'max'},
-                        {type: 'min'}
-                    ]
-                },
-                markLine: {
-                    data: [
-                        {type: 'average'}
-                    ],
-                    precision: 0
-                }
-            }";
+        {
+          name: '".$year."',
+          data: ".json_encode(array_values($month_solar)).",
+          type: 'line',
+          smooth: true,
+          itemStyle: {
+            color: '".c($year)."'
+          },
+          emphasis: {
+            focus: 'series'
+          },
+          markPoint: {
+            data: [
+              {
+                type: 'max'
+              },
+              {
+                type: 'min'
+              }
+            ]
+          },
+          markLine: {
+            data: [
+              {
+                type: 'average'
+              }
+            ],
+            precision: 0
+          }
+        }";
             $year = $year + 1;
         }
     // after looping through all years, generate the table
@@ -530,50 +536,51 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
     $month_html_script = "  <script type=\"text/javascript\">
     var myChart = echarts.init(document.getElementById('div_months'));
     var option = {
-        title: {
-            text: '".t(12)."',
-            textStyle: {
-                fontSize: 14
-            },
-            left: 'left'
+      title: {
+        text: '".t(12)."',
+        textStyle: {
+          fontSize: 14
         },
-        legend: {
-            data: ".json_encode(array_values($year_array)).",
-            left: 'right'
-        },
-        tooltip: {
-            trigger: 'axis',
-            formatter: function (params) {
-                var tooltipString = params[0].axisValue
-                params.forEach(function (item, index) {
-                    if (item.value > 0) {
-                        tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value}</span>`
-                    }
-                });
-                return tooltipString;
-            },
-            axisPointer: {
-                animation: false
+        left: 'left'
+      },
+      legend: {
+        data: ".json_encode(array_values($year_array)).",
+        left: 'right'
+      },
+      tooltip: {
+        trigger: 'axis',
+        formatter: function (params) {
+          var tooltipString = params[0].axisValue
+          params.forEach(function (item, index) {
+            if (item.value > 0) {
+              tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value}</span>`
             }
+          });
+          return tooltipString;
         },
-        grid: {
-            top: '40px',
-            left: '5px',
-            right: '30px',
-            bottom: '5px',
-            containLabel: true
-        },
-        xAxis: {
-            type: 'category',
-            data: [".t(28)."]
-        },
-        yAxis: {
-            type: 'value'
-        },
-        series: [".$month_chart."]
+        axisPointer: {
+          animation: false
+        }
+      },
+      grid: {
+        top: '40px',
+        left: '5px',
+        right: '30px',
+        bottom: '5px',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: [".t(28)."]
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [".$month_chart."
+      ]
     };
     myChart.setOption(option);
-</script>\n";
+  </script>\n";
     // output selection of table or only chart
     output($script_onlychart, $script_onlytable, "div_months", $month_html_script, $month_html_table);
     // end debug timing for month chart
@@ -717,30 +724,36 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                 $day_chart = $day_chart.",";
             }
             $day_chart = $day_chart."
-            {
-                name: '".$year."',
-                data: ".json_encode(array_values($day_solar)).",
-                type: 'line',
-                smooth: true,
-                itemStyle: {
-                    color: '".c($year)."'
-                },
-                emphasis: {
-                    focus: 'series'
-                },
-                markPoint: {
-                    data: [
-                        {type: 'max'},
-                        {type: 'min'}
-                    ]
-                },
-                markLine: {
-                    data: [
-                        {type: 'average'}
-                    ],
-                    precision: 1
-                }
-            }";
+        {
+          name: '".$year."',
+          data: ".json_encode(array_values($day_solar)).",
+          type: 'line',
+          smooth: true,
+          itemStyle: {
+            color: '".c($year)."'
+          },
+          emphasis: {
+            focus: 'series'
+          },
+          markPoint: {
+            data: [
+              {
+                type: 'max'
+              },
+              {
+                type: 'min'
+              }
+            ]
+          },
+          markLine: {
+            data: [
+              {
+                type: 'average'
+              }
+            ],
+            precision: 1
+          }
+        }";
             $year = $year + 1;
         }
     // after looping through all years, generate the table
@@ -791,51 +804,52 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
     $day_html_script = "\n  <script type=\"text/javascript\">
     var myChart = echarts.init(document.getElementById('div_days'));
     var option = {
-        title: {
-            text: '".t(13)."',
-            textStyle: {
-                fontSize: 14
-            },
-            left: 'left'
+      title: {
+        text: '".t(13)."',
+        textStyle: {
+          fontSize: 14
         },
-        legend: {
-            data: ".json_encode(array_values($year_array)).",
-            left: 'right'
+        left: 'left'
+      },
+      legend: {
+        data: ".json_encode(array_values($year_array)).",
+        left: 'right'
+      },
+      tooltip: {
+        trigger: 'axis',
+        formatter: function (params) {
+          var date = new Date(params[0].value[0]);
+          var tooltipString = date.getDate() + '.' + (date.getMonth() + 1) + '. :' 
+          params.forEach(function (item, index) {
+            tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value[1]}</span>`
+          });
+          return tooltipString;
         },
-        tooltip: {
-            trigger: 'axis',
-            formatter: function (params) {
-                var date = new Date(params[0].value[0]);
-                var tooltipString = date.getDate() + '.' + (date.getMonth() + 1) + '. :' 
-                params.forEach(function (item, index) {
-                    tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value[1]}</span>`
-                });
-                return tooltipString;
-            },
-            axisPointer: {
-                animation: false
-            }
-        },
-        grid: {
-            top: '40px',
-            left: '5px',
-            right: '32px',
-            bottom: '5px',
-            containLabel: true
-        },
-        xAxis: {
-            type: 'time',
-            splitArea: {
-                show: true
-            }
-        },
-        yAxis: {
-            type: 'value'
-        },
-        series: [".$day_chart."]
+        axisPointer: {
+          animation: false
+        }
+      },
+      grid: {
+        top: '40px',
+        left: '5px',
+        right: '32px',
+        bottom: '5px',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'time',
+        splitArea: {
+          show: true
+        }
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [".$day_chart."
+      ]
     };
     myChart.setOption(option);
-</script>\n";
+  </script>\n";
     // output selection of table or only chart
     output($script_onlychart, $script_onlytable, "div_days", $day_html_script, $day_html_table);
     // end debug timing for day chart
@@ -852,6 +866,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'hour') !== 
         // variable initialization
         $year = $year_first;
         $hour_array = array();
+        $hour_html_table = array();
         // loop for first to actual year
         while ($year <= $year_act) {
             // define start and end time of the loop year
@@ -880,37 +895,16 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'hour') !== 
             }
             $year = $year + 1;
         }
-        $hour_html_table = "  <table>
-        <tr>
-          <th style=\"width: 60px\">".t(27)."</th>
-          <th style=\"width: 40px\">00</th>
-          <th style=\"width: 40px\">01</th>
-          <th style=\"width: 40px\">02</th>
-          <th style=\"width: 40px\">03</th>
-          <th style=\"width: 40px\">04</th>
-          <th style=\"width: 40px\">05</th>
-          <th style=\"width: 40px\">06</th>
-          <th style=\"width: 40px\">07</th>
-          <th style=\"width: 40px\">08</th>
-          <th style=\"width: 40px\">09</th>
-          <th style=\"width: 40px\">10</th>
-          <th style=\"width: 40px\">11</th>
-          <th style=\"width: 40px\">12</th>
-          <th style=\"width: 40px\">13</th>
-          <th style=\"width: 40px\">14</th>
-          <th style=\"width: 40px\">15</th>
-          <th style=\"width: 40px\">16</th>
-          <th style=\"width: 40px\">17</th>
-          <th style=\"width: 40px\">18</th>
-          <th style=\"width: 40px\">19</th>
-          <th style=\"width: 40px\">20</th>
-          <th style=\"width: 40px\">21</th>
-          <th style=\"width: 40px\">22</th>
-          <th style=\"width: 40px\">23</th>";
-          if (!$script_onlytable) {
-            $hour_html_table = $hour_html_table."\n          <th style=\"width: 710px\">".t(9)."</th>\n";
+        $hour_html_table[] = "  <table>
+    <tr>
+      <th style=\"width: 60px\">".t(27)."</th>";
+        for ($i = 0; $i < 24; $i++) {
+            $hour_html_table[] = "      <th style=\"width: 40px\">".str_pad($i, 2, '0', STR_PAD_LEFT)."</th>";
         }
-        $hour_html_table = $hour_html_table."        </tr>\n";
+        if (!$script_onlytable) {
+            $hour_html_table[] = "      <th style=\"width: 710px\">".t(9)."</th>";
+        }
+        $hour_html_table[] = "    </tr>";
         $hour_chart_array = array();
         $hour_first = 23;
         $hour_last = 0;
@@ -935,8 +929,8 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'hour') !== 
             $hour_list[] = $hour;
         }
         for($month = 1; $month<=12; $month++) {
-            $hour_html_table = $hour_html_table."    <tr>
-          <td>".$month."</td>\n";
+            $hour_html_table[] = "    <tr>
+      <td>".$month."</td>";
             for ($hour = 0; $hour <= 23; $hour++) {
                 $hour_no_value = 0;
                 $hour_value = 0;
@@ -954,67 +948,67 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'hour') !== 
                 } else {
                     $hour_value = 0;
                 }
-                $hour_html_table = $hour_html_table."            <td>".$hour_value."</td>\n";
+                $hour_html_table[] = "      <td>".$hour_value."</td>";
               }
-            $hour_html_table = $hour_html_table."    </tr>\n";
+              $hour_html_table[] = "    </tr>";
         }
-        $hour_html_table = $hour_html_table."  </table>";
+        $hour_html_table[] = "  </table>";
+        $hour_html_table = join("\n", $hour_html_table);
       if ($hour_min == 10000) { $hour_min = 0; }
       $hour_html_script = "\n  <script type=\"text/javascript\">
-      var myChart = echarts.init(document.getElementById('div_hours'));
-
-      var data = ".json_encode(array_values($hour_chart_array)).";
-
-      data = data.map(function (item) {
-          return [item[1], item[0], item[2] || '-'];
-      });
-      
-      option = {
-          title: {
-              text: '".t(29)."',
-              textStyle: {
-                  fontSize: 14
-              },
-              left: 'left'
-          },
-          tooltip: {
-              position: 'top'
-          },
-          grid: {
-            top: '30px',
-            left: '5px',
-            right: '5px',
-            bottom: '5px',
-            containLabel: true
-          },
-          xAxis: {
-              type: 'category',
-              data: ".json_encode(array_values($hour_list)).",
-              splitArea: {
-                  show: true
-              }
-          },
-          yAxis: {
-              type: 'category',
-              data: ['12', '11', '10', '9', '8', '7', '6','5', '4', '3', '2','1'],
-              splitArea: {
-                  show: true
-              }
-          },
-          visualMap: {
-              min: ".$hour_min.",
-              max: ".$hour_max.",
-              show: false
-          },
-          series: [{
-              type: 'heatmap',
-              data: data,
-              label: {
-                  show: true
-              }
-          }]
-      };
-      myChart.setOption(option);
+    var myChart = echarts.init(document.getElementById('div_hours'));
+    var data = ".json_encode(array_values($hour_chart_array)).";
+    data = data.map(function (item) {
+      return [item[1], item[0], item[2] || '-'];
+    });
+    option = {
+      title: {
+        text: '".t(29)."',
+        textStyle: {
+          fontSize: 14
+        },
+        left: 'left'
+      },
+      tooltip: {
+        position: 'top'
+      },
+      grid: {
+        top: '30px',
+        left: '5px',
+        right: '5px',
+        bottom: '5px',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: ".json_encode(array_values($hour_list)).",
+        splitArea: {
+          show: true
+        }
+      },
+      yAxis: {
+        type: 'category',
+        data: ['12', '11', '10', '9', '8', '7', '6','5', '4', '3', '2','1'],
+        splitArea: {
+          show: true
+        }
+      },
+      visualMap: {
+        min: ".$hour_min.",
+        max: ".$hour_max.",
+        show: false
+      },
+      series: [
+        {
+          type: 'heatmap',
+          data: data,
+          label: {
+            show: true
+          }
+        }
+      ]
+    };
+    myChart.setOption(option);
   </script>\n";
         // output selection of table or only chart
         output($script_onlychart, $script_onlytable, "div_hours", $hour_html_script, $hour_html_table);
