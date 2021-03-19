@@ -13,8 +13,8 @@ jobs:
         id: prepare
         run: |
           DOCKER_IMAGE=froschie/sma-stats
-          VERSION=1.82
-          PLATFORMS=linux/arm/v7,linux/amd64
+          VERSION=1.9
+          PLATFORMS=linux/arm/v7,linux/amd64,linux/arm64
           echo ::set-output name=build_date::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=docker_image::${DOCKER_IMAGE}
