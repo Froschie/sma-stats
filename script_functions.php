@@ -120,13 +120,32 @@ function check_input_int($env_variable, $get_variable, $default) {
 }
 
 // table border html code
-function table_border_code($border) {
+function table_border_code($border, $dark) {
+    if ($dark) {
+        $color = "white";
+    } else {
+        $color = "black";
+    }
     if ($border) {
         return "\n    table, th, td {
-      border: 1px solid black;
+      border: 1px solid $color;
     }";
     } else {
         return "";
     }
+}
+
+// dark mode
+function dark_mode($env_variable, $get_variable, $default) {
+    $script_darkmode = check_input_bool($env_variable, $get_variable, $default);
+    $color_chart = "";
+    $color_text = "000000";
+    $color_bg = "ffffff";
+    if ($script_darkmode) {
+        $color_chart = ", 'dark'";
+        $color_text = "ffffff";
+        $color_bg = "000000";
+    }
+    return array ($script_darkmode, $color_chart, $color_text, $color_bg);
 }
 ?>

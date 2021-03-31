@@ -16,6 +16,7 @@ The "sma.php" script list and visualizes the [SMA Query](https://github.com/Fros
 | smadb_user | x | - | InfluxDB User |
 | smadb_pw | x | - | InfluxDB Password |
 | lang | x | x | Script output language selection. Possible values: "de" or "en". |
+| dark | x | x | Enable dark mode. |
 | table_borders | x | x | Hides table borders in HTML by setting it to "no". |
 | chart | x | x | Chart selection. Multiple values possible: "all", "year", "breakdown", "month" or "day". |
 | breakstep | x | x | Steps for the Breakdown table/charts in kWh. Default value = 5. |
@@ -34,7 +35,7 @@ The "sma.php" script list and visualizes the [SMA Query](https://github.com/Fros
 | endyear | x | x | Defines the last year the statistic should be generated for. Values can be "actual" or the 4-digit year number. |
 | timing | - | x | Debug option to show script runtimes |
 
-Example request: `http://192.168.1.1:8080/sma.php?lang=de&table_borders=no&chart=monthday&timing&max_solar&baseline&nogrid_time&car_charging=1400&over_supply=3000&startyear=2021&endyear=actual&color=2021,00ff00;2022,ff0000`
+Example request: `http://192.168.1.1:8080/sma.php?lang=de&table_borders=no&chart=monthday&timing&max_solar&baseline&nogrid_time&car_charging=1400&over_supply=3000&startyear=2021&endyear=actual&color=2021,00ff00;2022,ff0000&dark=no`
 
 
 ## Electric Meter Statistics
@@ -51,6 +52,7 @@ The "em.php" script list and visualizes the [Electric Meter](https://github.com/
 | emdb_user | x | - | InfluxDB User |
 | emdb_pw | x | - | InfluxDB Password |
 | lang | x | x | Script output language selection. Possible values: "de" or "en". |
+| dark | emdark | x | Enable dark mode. |
 | table_borders | x | x | Hides table borders in HTML by setting it to "no". |
 | chart | x | x | Chart selection. Multiple values possible: "all", "year" or "month". |
 | startyear | x | x | Defines the first year the statistic should be generated for. Values can be "actual" or the 4-digit year number. |
@@ -74,6 +76,7 @@ The "em.php" script list and visualizes the [Water Meter](https://github.com/Fro
 | wmdb_user | x | - | InfluxDB User |
 | wmdb_pw | x | - | InfluxDB Password |
 | lang | wmlang | x | Script output language selection. Possible values: "de" or "en". |
+| dark | wmdark | x | Enable dark mode. |
 | table_borders | wmtable_borders | x | Hides table borders in HTML by setting it to "no". |
 | chart | wmchart | x | Chart selection. Multiple values possible: "all", "year", "month" or "day". |
 | onlychart | - | x | Show only Chart graph(s) but no tables |

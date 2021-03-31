@@ -92,9 +92,6 @@ function d($value) {
   return $value;
 }
 
-// table border value check
-$table_border = table_border_code(check_input_bool("table_borders", "table_borders", TRUE));
-
 // max solar production value check
 $script_max_solar = check_input_bool("max_solar", "max_solar", FALSE);
 
@@ -144,6 +141,16 @@ $script_onlychart = check_input_bool("onlychart", "onlychart", FALSE);
 // only table output value check
 $script_onlytable = check_input_bool("onlytable", "onlytable", FALSE);
 
+// check for dark mode
+$return_array = dark_mode("dark", "dark", FALSE);
+$script_darkmode = $return_array[0];
+$color_chart = $return_array[1];
+$color_text = $return_array[2];
+$color_bg = $return_array[3];
+
+// table border value check
+$table_border = table_border_code(check_input_bool("table_borders", "table_borders", TRUE), $script_darkmode);
+
 // set first and last year for query
 $f_year = inf_query_year('SELECT first(solar_total) FROM totals tz(\'Europe/Berlin\')');
 $l_year = inf_query_year('SELECT last(solar_total) FROM totals tz(\'Europe/Berlin\')');
@@ -164,7 +171,7 @@ print("<!DOCTYPE html>
     }
   </style>
 </head>
-<body>
+<body text=\"#".$color_text."\" bgcolor=\"#".$color_bg."\">
   <script src=\"echarts.js\"></script>\n");
 
 // year chart
@@ -212,7 +219,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
                 $year_solar_max_header = "\n      <th style=\"width: 90px\">".t(19)."</th>";
             }
             // save values into array for chart
-            $year_array[] = $year;
+            $year_array[] = strval($year);
             $year_solar[] = $solar;
             // generate table rows
             $year_table = "    <tr>
@@ -245,7 +252,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
     }
     $year_html_table = $year_html_table."\n    </tr>\n".$year_table."  </table>\n";
     $year_html_script = "  <script type=\"text/javascript\">
-    var myChart = echarts.init(document.getElementById('div_years'));
+    var myChart = echarts.init(document.getElementById('div_years')".$color_chart.");
     var option = {
       title: {
         text: '".t(11)."',
@@ -303,18 +310,22 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'breakdown')
         $result = $database->query('SELECT max(solar_daily) as solar_max FROM totals_daily');
         $points = $result->getPoints();
         $breakdown_steps = ceil($points[0]['solar_max']/1000/$breakdown_step);
+        // html table generation
+        $breakdown_html_table = array();
+        $breakdown_html_table[] = "  <table>\n    <tr>\n      <th style=\"width: 70px\">".t(1)."</th>";
+        for ($i = 0; $i < ($breakdown_steps*$breakdown_step); ) {
+            $breakdown_html_table[] = "      <th style=\"width: 90px\">".t(31).$i."-".$i+$breakdown_step." kWh</th>";
+            $i = $i+$breakdown_step;
+        }
+        if (!$script_onlytable) {
+            $breakdown_html_table[] = "      <th style=\"width: 710px\">".t(9)."</th>";
+        }
         // loop for first to actual year
         while ($year <= $year_act) {
             // variable initialization
-            $breakdown_html_table = array();
-            $breakdown_html_table[] = "  <table>\n    <tr>\n      <th style=\"width: 70px\">".t(1)."</th>";
             for ($i = 0; $i < ($breakdown_steps*$breakdown_step); ) {
                 $breakdown_array[$year][$i] = 0;
-                $breakdown_html_table[] = "      <th style=\"width: 90px\">".t(31).$i."-".$i+$breakdown_step." kWh</th>";
                 $i = $i+$breakdown_step;
-            }
-            if (!$script_onlytable) {
-                $breakdown_html_table[] = "      <th style=\"width: 710px\">".t(9)."</th>";
             }
             // define start and end time of the loop year
             $start_time = mktime(0, 0, 0, 1, 1, $year);
@@ -328,12 +339,12 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'breakdown')
                 $breakdown_array[$year][$breakdown_field] = $breakdown_array[$year][$breakdown_field] + 1;
             }
             // generate table entries
-            $breakdown_table[] = "    <tr>\n      <td>".$year."</td>";
+            $temp_table = array();
             foreach ($breakdown_array[$year] as $value) {
-                $breakdown_table[] = "      <td>".$value."</td>";
+                $temp_table[] = "      <td>".$value."</td>";
             }
-            $breakdown_table[] = "    </tr>";
-            $year_array[] = $year;
+            $breakdown_table[] = "    <tr>\n      <td>".$year."</td>\n".join("\n", $temp_table)."\n    </tr>";
+            $year_array[] = strval($year);
             $year = $year + 1;
         }
         // generate JSON for chart series
@@ -355,10 +366,10 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'breakdown')
             $i = $i+$breakdown_step;
         }
     // after looping through all years, generate the table
-    $breakdown_html_table[] = "    </tr>\n".join("\n", $breakdown_table)."\n  </table>\n";
+    $breakdown_html_table[] = "    </tr>\n".join("\n", array_reverse($breakdown_table))."\n  </table>\n";
     $breakdown_html_table = join("\n", $breakdown_html_table);
     $breakdown_html_script = "  <script type=\"text/javascript\">
-    var myChart = echarts.init(document.getElementById('div_breakdown'));
+    var myChart = echarts.init(document.getElementById('div_breakdown')".$color_chart.");
     var option = {
       title: {
         text: '".t(32)."',
@@ -534,7 +545,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
     }
     $month_html_table = $month_html_table."\n    </tr>\n".$month_table."  </table>\n";
     $month_html_script = "  <script type=\"text/javascript\">
-    var myChart = echarts.init(document.getElementById('div_months'));
+    var myChart = echarts.init(document.getElementById('div_months')".$color_chart.");
     var option = {
       title: {
         text: '".t(12)."',
@@ -802,7 +813,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
     }
     $day_html_table = $day_html_table."\n    </tr>\n".$day_table."  </table>";
     $day_html_script = "\n  <script type=\"text/javascript\">
-    var myChart = echarts.init(document.getElementById('div_days'));
+    var myChart = echarts.init(document.getElementById('div_days')".$color_chart.");
     var option = {
       title: {
         text: '".t(13)."',
@@ -956,7 +967,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'hour') !== 
         $hour_html_table = join("\n", $hour_html_table);
       if ($hour_min == 10000) { $hour_min = 0; }
       $hour_html_script = "\n  <script type=\"text/javascript\">
-    var myChart = echarts.init(document.getElementById('div_hours'));
+    var myChart = echarts.init(document.getElementById('div_hours')".$color_chart.");
     var data = ".json_encode(array_values($hour_chart_array)).";
     data = data.map(function (item) {
       return [item[1], item[0], item[2] || '-'];

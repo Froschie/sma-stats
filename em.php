@@ -77,8 +77,15 @@ function d($value) {
     return $value;
 }
 
+// check for dark mode
+$return_array = dark_mode("emdark", "dark", FALSE);
+$script_darkmode = $return_array[0];
+$color_chart = $return_array[1];
+$color_text = $return_array[2];
+$color_bg = $return_array[3];
+
 // table border value check
-$table_border = table_border_code(check_input_bool("table_borders", "table_borders", TRUE));
+$table_border = table_border_code(check_input_bool("table_borders", "table_borders", TRUE), $script_darkmode);
 
 // chart value check
 $script_chart = getenv('chart');
@@ -107,7 +114,7 @@ print("<!DOCTYPE html>
     }
   </style>
 </head>
-<body>
+<body text=\"#".$color_text."\" bgcolor=\"#".$color_bg."\">
   <script src=\"echarts.js\"></script>\n");
 
 // set first and last year for query
@@ -144,7 +151,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
             $grid_em = round($points_em[0]['grid']/1000, 0);
             $supply_em = round($points_em[0]['supply']/1000, 0);
             // save values into array for chart
-            $year_array[] = $year;
+            $year_array[] = strval($year);
             $year_grid_em[] = $grid_em;
             $year_supply_em[] = $supply_em;
             // SMA InfluxDB query
@@ -192,109 +199,109 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'year') !== 
       <th style=\"width: 6%\">".t(11)." (".t(9).")</th>
       <th style=\"width: 6%\">".t(12)." (".t(9).")</th>\n";
         $chart_solar_sma = ",
-          {
-            name: '".t(5)." kWh',
-            type: 'bar',
-            barGap: 0,
-            emphasis: {
-                focus: 'series'
-            },
-            itemStyle: {
-              color: '#ffff00'
-            },
-            data: ".json_encode(array_values($year_solar_sma))."
-          }\n";
-        $chart_consumption_sma = ",
-          {
-              name: '".t(4)." kWh',
-              type: 'bar',
-              barGap: 0,
-              emphasis: {
-                  focus: 'series'
-              },
-              itemStyle: {
-                  color: '#ffaa00'
-              },
-              data: ".json_encode(array_values($year_consumption_sma))."
+        {
+          name: '".t(5)." kWh',
+          type: 'bar',
+          barGap: 0,
+          emphasis: {
+            focus: 'series'
           },
-          {
-              name: '".t(13)." kWh',
-              type: 'bar',
-              barGap: 0,
-              emphasis: {
-                  focus: 'series'
-              },
-              itemStyle: {
-                  color: '#ffcc00'
-              },
-              data: ".json_encode(array_values($year_own_consumption))."
-          }";
+          itemStyle: {
+            color: '#ffff00'
+          },
+          data: ".json_encode(array_values($year_solar_sma))."
+        }\n";
+        $chart_consumption_sma = ",
+        {
+          name: '".t(4)." kWh',
+          type: 'bar',
+          barGap: 0,
+          emphasis: {
+            focus: 'series'
+          },
+          itemStyle: {
+            color: '#ffaa00'
+          },
+          data: ".json_encode(array_values($year_consumption_sma))."
+        },
+        {
+          name: '".t(13)." kWh',
+          type: 'bar',
+          barGap: 0,
+          emphasis: {
+            focus: 'series'
+          },
+          itemStyle: {
+            color: '#ffcc00'
+          },
+          data: ".json_encode(array_values($year_own_consumption))."
+        }";
     }
     $year_html_table = $year_html_table."      <th style=\"width: 40%\">".t(7)."</th>
     </tr>\n".$year_table."  </table>\n";
     $year_html_script = "  <script type=\"text/javascript\">
-    var myChart = echarts.init(document.getElementById('chart_years'));
+    var myChart = echarts.init(document.getElementById('chart_years')".$color_chart.");
     var option = {
-        title: {
-            text: '".t(6)."',
-            textStyle: {
-                fontSize: 14
-            },
-            left: 'center'
+      title: {
+        text: '".t(6)."',
+        textStyle: {
+          fontSize: 14
         },
-        tooltip: {
-            trigger: 'axis',
-            formatter: function (params) {
-                var tooltipString = params[0].axisValue
-                params.forEach(function (item, index) {
-                    tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value}</span>`
-                });
-                return tooltipString;
-            },
-            axisPointer: {
-                animation: false
-            }
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'axis',
+        formatter: function (params) {
+          var tooltipString = params[0].axisValue
+          params.forEach(function (item, index) {
+            tooltipString = `\${tooltipString}<br /><span style=\"float: left;\">\${item.marker} \${item.seriesName}:</span>&emsp;<span style=\"float: right;\">\${item.value}</span>`
+          });
+          return tooltipString;
         },
-        grid: {
-            top: '35px',
-            left: '5px',
-            right: '5px',
-            bottom: '5px',
-            containLabel: true
-        },
-        xAxis: {
-            type: 'category',
-            data: ".json_encode(array_values($year_array))."
-        },
-        yAxis: {
-            type: 'value'
-        },
-        series: [
-          {
-            name: '".t(2)." kWh',
-            type: 'bar',
-            barGap: 0,
-            emphasis: {
-                focus: 'series'
-            },
-            itemStyle: {
-              color: '#ff2200'
-            },
-            data: ".json_encode(array_values($year_grid_em))."
-          }".$chart_consumption_sma.",
-          {
-            name: '".t(3)." kWh',
-            type: 'bar',
-            barGap: 0,
-            emphasis: {
-                focus: 'series'
-            },
-            itemStyle: {
-              color: '#22ff00'
-            },
-            data: ".json_encode(array_values($year_supply_em))."
-          }".$chart_solar_sma."
-        ]
+        axisPointer: {
+          animation: false
+        }
+      },
+      grid: {
+        top: '35px',
+        left: '5px',
+        right: '5px',
+        bottom: '5px',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: ".json_encode(array_values($year_array))."
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [
+        {
+          name: '".t(2)." kWh',
+          type: 'bar',
+          barGap: 0,
+          emphasis: {
+            focus: 'series'
+          },
+          itemStyle: {
+            color: '#ff2200'
+          },
+          data: ".json_encode(array_values($year_grid_em))."
+        }".$chart_consumption_sma.",
+        {
+          name: '".t(3)." kWh',
+          type: 'bar',
+          barGap: 0,
+          emphasis: {
+            focus: 'series'
+          },
+          itemStyle: {
+            color: '#22ff00'
+          },
+          data: ".json_encode(array_values($year_supply_em))."
+        }".$chart_solar_sma."
+      ]
     };
     myChart.setOption(option);
   </script>\n";
@@ -390,12 +397,12 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'month') !==
                     $self_sufficiency = "-";    
                 }
                 $month_table_temp_sma = "      <td>".$solar_sma." kWh</td>
-        <td>".$grid_sma." kWh</td>
-        <td>".$consumption_sma." kWh</td>
-        <td>".$supply_sma." kWh</td>
-        <td>".$own_consumption." kWh</td>
-        <td>".$self_consumption." %</td>
-        <td>".$self_sufficiency." %</td>\n";
+      <td>".$grid_sma." kWh</td>
+      <td>".$consumption_sma." kWh</td>
+      <td>".$supply_sma." kWh</td>
+      <td>".$own_consumption." kWh</td>
+      <td>".$self_consumption." %</td>
+      <td>".$self_sufficiency." %</td>\n";
             }
             // generate table rows
             if ($grid_em > 0) {

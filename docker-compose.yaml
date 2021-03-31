@@ -42,4 +42,7 @@ services:
       - startyear=2020
       - endyear=actual
       - breakstep=5
+      - dark=no
+      - wmdark=no
+      - emdark=no
     restart: unless-stopped
