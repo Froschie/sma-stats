@@ -607,6 +607,13 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
         $day_time_start = hrtime(true);
         // variable initialization
         $year = $year_first;
+        if ($script_days > 0) {
+            $time_in_days = strtotime("-".$script_days." day", time());
+        } else {
+            $time_in_days = mktime(0, 0, 0, 1, 1, $year);
+        }
+        $day_in_days = date("z", $time_in_days);
+        $year_in_days = date('Y', $time_in_days);
         $year_array = array();
         $day_chart = "";
         $day_table = "";
@@ -648,7 +655,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                         $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(22)."</th>";
                     }
                     // check for maximul solar generation during 5min in day
-                    if ($script_time_solar > 0 or $script_nogrid_time or $script_car_charging > 0 or $script_over_supply > 0) {
+                    if (($script_time_solar > 0 or $script_nogrid_time or $script_car_charging > 0 or $script_over_supply > 0) and $year >= $year_in_days and (($year == $year_in_days and $day_no >= $day_in_days) or ($year > $year_in_days))) {
                         // InfluxDB query
                         $start_time = strtotime($day['time']);
                         $end_time = strtotime("+1 day", $start_time);
