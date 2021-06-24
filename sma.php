@@ -98,6 +98,9 @@ $script_max_solar = check_input_bool("max_solar", "max_solar", FALSE);
 // solar times
 $script_time_solar = check_input_int("time_solar", "time_solar", 0);
 
+// supply times
+$script_time_supply = check_input_int("time_supply", "time_supply", 0);
+
 // days for day table
 $script_days = check_input_int("days", "days", 0);
 
@@ -655,7 +658,7 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                         $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(22)."</th>";
                     }
                     // check for maximul solar generation during 5min in day
-                    if (($script_time_solar > 0 or $script_nogrid_time or $script_car_charging > 0 or $script_over_supply > 0) and $year >= $year_in_days and (($year == $year_in_days and $day_no >= $day_in_days) or ($year > $year_in_days))) {
+                    if (($script_time_solar > 0 or $script_time_supply > 0 or $script_nogrid_time or $script_car_charging > 0 or $script_over_supply > 0) and $year >= $year_in_days and (($year == $year_in_days and $day_no >= $day_in_days) or ($year > $year_in_days))) {
                         // InfluxDB query
                         $start_time = strtotime($day['time']);
                         $end_time = strtotime("+1 day", $start_time);
@@ -667,12 +670,20 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                         $day_over_supply = 0;
                         $day_first_solar_time = "";
                         $day_last_solar_time = "";
+                        $day_first_supply_time = "";
+                        $day_last_supply_time = "";
                         foreach ($points as $value) {
                             if ($value['solar'] > $script_time_solar && $day_first_solar_time == "") {
                                 $day_first_solar_time = $value['time'];
                             }
                             if ($value['solar'] > $script_time_solar) {
                                 $day_last_solar_time = $value['time'];
+                            }
+                            if ($value['supply'] > $script_time_supply && $day_first_supply_time == "") {
+                                $day_first_supply_time = $value['time'];
+                            }
+                            if ($value['supply'] > $script_time_supply) {
+                                $day_last_supply_time = $value['time'];
                             }
                             if (intval($value['grid']) == 0 && is_numeric($value['grid'])) {
                                 $day_nogrid_time = $day_nogrid_time + 5;
@@ -696,8 +707,22 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
                             } else {
                                 $day_solar_max_html = $day_solar_max_html."\n      <td>---</td>";
                             }
-                            $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(20).$script_time_solar."W</th>
-      <th style=\"width: 90px\">".t(21).$script_time_solar."W</th>";
+                            $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(20).$script_time_solar."W ".t(2)."</th>
+      <th style=\"width: 90px\">".t(21).$script_time_solar."W ".t(2)."</th>";
+                        }
+                        if ($script_time_supply > 0) {
+                          if ($day_first_supply_time != "") {
+                              $day_solar_max_html = $day_solar_max_html."\n      <td>".date("H:i", strtotime($day_first_supply_time))."</td>";
+                          } else {
+                              $day_solar_max_html = $day_solar_max_html."\n      <td>---</td>";
+                          }
+                          if ($day_last_supply_time != "") {
+                              $day_solar_max_html = $day_solar_max_html."\n      <td>".date("H:i", strtotime($day_last_supply_time))."</td>";
+                          } else {
+                              $day_solar_max_html = $day_solar_max_html."\n      <td>---</td>";
+                          }
+                          $day_solar_max_header = $day_solar_max_header."\n      <th style=\"width: 90px\">".t(20).$script_time_supply."W ".t(5)."</th>
+                          <th style=\"width: 90px\">".t(21).$script_time_supply."W ".t(5)."</th>";
                         }
                         if ($script_nogrid_time) {
                             $day_solar_max_html = $day_solar_max_html."\n      <td>".$day_nogrid_time." min</td>";
@@ -796,6 +821,9 @@ if (strpos($script_chart, 'all') !== false or strpos($script_chart, 'day') !== f
             $day_solar_max_html = $day_solar_max_html."\n      <td></td>";
         }
         if ($script_time_solar) {
+            $day_solar_max_html = $day_solar_max_html."\n      <td></td>\n      <td></td>";
+        }
+        if ($script_time_supply) {
             $day_solar_max_html = $day_solar_max_html."\n      <td></td>\n      <td></td>";
         }
         if ($script_nogrid_time) {

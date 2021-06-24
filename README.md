@@ -23,7 +23,8 @@ The "sma.php" script list and visualizes the [SMA Query](https://github.com/Fros
 | onlychart | x | x | Show only Chart graph(s) but no tables. |
 | onlytable | x | x | Show only HTML table and no graphs. |
 | max_solar | x | x | Shows max. peak solar generation within 5min periode from year/month/day if set to "yes". |
-| time_solar | x | x | Shows column with first and last time solar generation was over specified value within 5min periode of the day. Only for day table! Default value = 100W. |
+| time_solar | x | x | Shows column with first and last time solar generation was over specified value within 5min periode of the day. Only for day table! |
+| time_supply | x | x | Shows column with first and last time supply was over specified value within 5min periode of the day. Only for day table! |
 | baseline | x | x | Shows colum for the smallest power consumption within 5min periode of the day. Only for day table! |
 | nogrid_time | x | x | Shows colum for the time where no power from grid is consumed. |
 | car_charging | x | x | Shows colum for possible kWh which could be used to charge a electric car having a definable minimum charging Watt level. |
